@@ -2,9 +2,12 @@ import { useEffect } from 'react';
 import './LoginPage.css'
 
 function LoginPage() {
+    const viteKakaoRestApiKey = import.meta.env.VITE_KAKAO_REST_API_KEY
+    const viteKakaoRedirectUri = import.meta.env.VITE_KAKAO_REDIRECT_URI
+
     useEffect(() => {
         if (window.Kakao && !window.Kakao.isInitialized()) {
-            window.Kakao.init(import.meta.env.VITE_KAKAO_REST_API_KEY);
+            window.Kakao.init(viteKakaoRestApiKey);
         }
     }, []);
 
@@ -15,7 +18,7 @@ function LoginPage() {
         }
 
         window.Kakao.Auth.authorize({
-            redirectUri: import.meta.env.VITE_KAKAO_REDIRECT_URI
+            redirectUri: viteKakaoRedirectUri
         });
     };
 

@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 function KakaoCallbackPage() {
     const navigate = useNavigate();
     const isProcessed = useRef(false);
+    const viteApiBaseUrl = import.meta.env.VITE_API_BASE_URL
 
     useEffect(() => {
         if (isProcessed.current) return;
@@ -14,7 +15,7 @@ function KakaoCallbackPage() {
         if (code) {
             const sendCodeToBackend = async () => {
                 try {
-                    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}`, {
+                    const response = await fetch(viteApiBaseUrl, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
