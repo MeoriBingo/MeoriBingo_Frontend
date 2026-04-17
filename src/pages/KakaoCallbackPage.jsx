@@ -55,7 +55,7 @@ function KakaoCallbackPage() {
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-            <h2>카카오 로그인 처리 중입니다...</h2>
+            <h2>카카오 로그인 처리 중...</h2>
             <p>잠시만 기다려주세요.</p>
         </div>
     );
