@@ -4,6 +4,8 @@ import './LoginPage.css'
 function LoginPage() {
     const viteKakaoRestApiKey = import.meta.env.VITE_KAKAO_REST_API_KEY
     const viteKakaoRedirectUri = import.meta.env.VITE_KAKAO_REDIRECT_URI
+    console.log(viteKakaoRestApiKey)
+    console.log(viteKakaoRedirectUri)
 
     useEffect(() => {
         if (window.Kakao && !window.Kakao.isInitialized()) {

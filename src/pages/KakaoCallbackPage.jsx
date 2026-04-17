@@ -5,6 +5,7 @@ function KakaoCallbackPage() {
     const navigate = useNavigate();
     const isProcessed = useRef(false);
     const viteApiBaseUrl = import.meta.env.VITE_API_BASE_URL
+    console.log(viteApiBaseUrl)
 
     useEffect(() => {
         if (isProcessed.current) return;
