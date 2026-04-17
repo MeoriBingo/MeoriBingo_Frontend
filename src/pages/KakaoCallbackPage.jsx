@@ -16,7 +16,7 @@ function KakaoCallbackPage() {
         if (code) {
             const sendCodeToBackend = async () => {
                 try {
-                    const response = await fetch(viteApiBaseUrl, {
+                    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
