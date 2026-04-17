@@ -4,7 +4,7 @@ import './LoginPage.css'
 function LoginPage() {
     useEffect(() => {
         if (window.Kakao && !window.Kakao.isInitialized()) {
-            window.Kakao.init(import.meta.env.VITE_KAKAO_REST_API_KEY);
+            window.Kakao.init(import.meta.env.VITE_KAKAO_JS_KEY);
         }
     }, []);
 
