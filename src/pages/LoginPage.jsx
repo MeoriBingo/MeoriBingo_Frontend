@@ -2,9 +2,6 @@ import { useEffect } from 'react';
 import './LoginPage.css'
 
 function LoginPage() {
-    console.log("ALL ENV:", import.meta.env);
-    console.log("KAKAO KEY:", import.meta.env.VITE_KAKAO_JS_KEY);
-
     useEffect(() => {
         if (window.Kakao && !window.Kakao.isInitialized()) {
             window.Kakao.init(import.meta.env.VITE_KAKAO_JS_KEY);
