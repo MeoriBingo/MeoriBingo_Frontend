@@ -120,7 +120,7 @@ function MyPage() {
                             }}
                             style={{ padding: '8px 12px', cursor: 'pointer', backgroundColor: isNicknameEditing ? '#6c757d' : '#28a745', color: 'white', border: 'none', borderRadius: '4px' }}
                         >
-                            {isNicknameEditing ? '취소' : '수정'}
+                            {isNicknameEditing ? '취소' : 'EDIT'}
                         </button>
                     </div>
                 </div>
@@ -147,7 +147,7 @@ function MyPage() {
                             }}
                             style={{ padding: '8px 12px', cursor: 'pointer', backgroundColor: isEmailEditing ? '#6c757d' : '#28a745', color: 'white', border: 'none', borderRadius: '4px' }}
                         >
-                            {isEmailEditing ? '취소' : '수정'}
+                            {isEmailEditing ? '취소' : 'EDIT'}
                         </button>
                     </div>
                 </div>
