@@ -19,6 +19,8 @@ function MainPage() {
   });
 
   const [timeRemaining, setTimeRemaining] = useState({ hours: '00', minutes: '00' });
+  const [bingoHistory, setBingoHistory] = useState(null);
+  const [isBingoLoading, setIsBingoLoading] = useState(true);
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -50,6 +52,43 @@ function MainPage() {
   }, []);
 
   useEffect(() => {
+    const fetchBingoHistory = async () => {
+      try {
+        const token = localStorage.getItem('accessToken');
+        if (!token) {
+          setIsBingoLoading(false);
+          return;
+        }
+
+        const baseUrl = import.meta.env.VITE_API_BASE_URL;
+        const today = new Date();
+        const targetDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+        
+        const response = await fetch(`${baseUrl}/api/bingo/history/by-date?target_date=${targetDate}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          // 백엔드 응답이 { data: [...] } 거나 직접 [...] 형태일 수 있으므로 두 경우 모두 방어
+          const history = Array.isArray(result.data) ? result.data : (Array.isArray(result) ? result : []);
+          setBingoHistory(history);
+        } else {
+          console.error('빙고 내역을 불러오는데 실패했습니다.');
+        }
+      } catch (error) {
+        console.error('빙고 내역 API 호출 오류:', error);
+      } finally {
+        setIsBingoLoading(false);
+      }
+    };
+
+    fetchBingoHistory();
+  }, []);
+
+  useEffect(() => {
     const calculateTimeRemaining = () => {
       const now = new Date();
       const midnight = new Date();
@@ -70,6 +109,39 @@ function MainPage() {
 
     return () => clearInterval(timerId);
   }, []);
+
+  const handleGenerateBingo = async () => {
+    try {
+      const userStr = localStorage.getItem('user');
+      const token = localStorage.getItem('accessToken');
+      if (!userStr || !token) {
+        alert('로그인이 필요합니다.');
+        return;
+      }
+      const user = JSON.parse(userStr);
+
+      const baseUrl = import.meta.env.VITE_API_BASE_URL;
+      const response = await fetch(`${baseUrl}/api/bingo/generate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ user_id: user.id })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setBingoHistory([data]);
+      } else {
+        console.error('빙고 생성에 실패했습니다.');
+        alert('빙고 생성에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('빙고 생성 API 호출 중 오류 발생:', error);
+      alert('빙고 생성 중 오류가 발생했습니다.');
+    }
+  };
 
   return (
     <div className="main-page">
@@ -94,16 +166,59 @@ function MainPage() {
           </span>
         </div>
 
-        <div className="main-page__grid" role="list" aria-label="빙고 미션 9칸">
-          {Array.from({ length: 9 }, (_, i) => (
-            <div key={i} className="main-page__tile" role="listitem" />
-          ))}
-        </div>
+        {isBingoLoading ? (
+          <div style={{ textAlign: 'center', padding: '40px 0', color: '#666' }}>
+            빙고 정보를 불러오는 중...
+          </div>
+        ) : (bingoHistory && bingoHistory.length > 0) ? (
+          <>
+            <div className="main-page__grid" role="list" aria-label="빙고 미션 9칸">
+              {(() => {
+                const firstBingo = bingoHistory[0];
+                const cells = firstBingo?.cells || [];
+                const sortedCells = [...cells].sort((a, b) => a.position - b.position);
 
-        <button type="button" className="main-page__regen">
-          <IconRefresh />
-          빙고판 재생성
-        </button>
+                if (sortedCells.length === 0) {
+                  return Array.from({ length: 9 }, (_, i) => (
+                    <div key={i} className="main-page__tile" role="listitem" />
+                  ));
+                }
+
+                return sortedCells.map((cell) => (
+                  <div key={cell.id} className="main-page__tile" role="listitem">
+                    {cell.mission_id}
+                  </div>
+                ));
+              })()}
+            </div>
+
+            <button type="button" className="main-page__regen">
+              <IconRefresh />
+              빙고판 재생성
+            </button>
+          </>
+        ) : (
+          <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }}>
+            <button type="button" style={{ 
+              padding: '16px 32px', 
+              fontSize: '18px', 
+              backgroundColor: '#007bff', 
+              color: 'white', 
+              border: 'none', 
+              borderRadius: '12px', 
+              cursor: 'pointer', 
+              fontWeight: 'bold', 
+              boxShadow: '0 4px 12px rgba(0,123,255,0.3)',
+              transition: 'background-color 0.2s'
+            }}
+            onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#0056b3'}
+            onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#007bff'}
+            onClick={handleGenerateBingo}
+            >
+              빙고 생성하기
+            </button>
+          </div>
+        )}
 
         <p className="main-page__deadline">빙고 미션 달성 마감까지 {timeRemaining.hours}시간 {timeRemaining.minutes}분 남았습니다.</p>
       </div>
