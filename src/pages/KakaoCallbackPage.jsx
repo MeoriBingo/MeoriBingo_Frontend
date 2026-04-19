@@ -16,7 +16,7 @@ function KakaoCallbackPage() {
         if (code) {
             const sendCodeToBackend = async () => {
                 try {
-                    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}`, {
+                    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/auth/login`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -33,7 +33,7 @@ function KakaoCallbackPage() {
                             localStorage.setItem('user', JSON.stringify(result.data.user));
 
                             // 닉네임 설정 필요 등의 로직은 추후 추가
-                            navigate('/login-success');
+                            navigate('/main');
                         } else {
                             console.error('Login failed logic:', result.message);
                             navigate('/login-fail');

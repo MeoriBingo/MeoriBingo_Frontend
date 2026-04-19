@@ -5,23 +5,28 @@ import FriendPage from './pages/FriendPage'
 import MyPage from './pages/MyPage'
 import AdminPage from './pages/AdminPage'
 import KakaoCallbackPage from './pages/KakaoCallbackPage'
-import LoginSuccessPage from './pages/LoginSuccessPage'
 import LoginFailPage from './pages/LoginFailPage'
+import { UserProvider } from './contexts/UserContext'
+import Layout from './components/Layout'
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<LoginPage />} />
-        <Route path="/main" element={<MainPage />} />
-        <Route path="/friend" element={<FriendPage />} />
-        <Route path="/mypage" element={<MyPage />} />
-        <Route path="/admin" element={<AdminPage />} />
-        <Route path="/auth/kakao/callback" element={<KakaoCallbackPage />} />
-        <Route path="/login-success" element={<LoginSuccessPage />} />
-        <Route path="/login-fail" element={<LoginFailPage />} />
-      </Routes>
-    </BrowserRouter>
+    <UserProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<LoginPage />} />
+          <Route path="/auth/kakao/callback" element={<KakaoCallbackPage />} />
+          <Route path="/login-fail" element={<LoginFailPage />} />
+
+          <Route element={<Layout />}>
+            <Route path="/main" element={<MainPage />} />
+            <Route path="/friend" element={<FriendPage />} />
+            <Route path="/mypage" element={<MyPage />} />
+            <Route path="/admin" element={<AdminPage />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </UserProvider>
   )
 }
 
