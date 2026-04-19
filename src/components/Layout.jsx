@@ -51,10 +51,6 @@ function Layout() {
                         <IconCart />
                         Friend
                     </button>
-                    <button type="button" className="layout__nav-item">
-                        <IconCart />
-                        Label
-                    </button>
                     <button 
                         type="button" 
                         className={`layout__nav-item ${location.pathname === '/mypage' ? 'layout__nav-item--active' : ''}`} 
@@ -62,6 +58,14 @@ function Layout() {
                     >
                         <IconCart />
                         MyPage
+                    </button>
+                    <button 
+                        type="button" 
+                        className={`layout__nav-item ${location.pathname === '/admin' ? 'layout__nav-item--active' : ''}`} 
+                        onClick={() => navigate('/admin')}
+                    >
+                        <IconCart />
+                        ADMIN
                     </button>
                 </div>
             </nav>
