@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import apiClient from '../api/apiClient'
+import PhotoUploadModal from '../components/PhotoUploadModal'
 import './MainPage.css'
 
 function IconRefresh() {
@@ -22,6 +23,7 @@ function MainPage() {
   const [timeRemaining, setTimeRemaining] = useState({ hours: '00', minutes: '00' });
   const [bingoHistory, setBingoHistory] = useState(null);
   const [isBingoLoading, setIsBingoLoading] = useState(true);
+  const [selectedCell, setSelectedCell] = useState(null);
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -47,24 +49,24 @@ function MainPage() {
     fetchUserInfo();
   }, []);
 
+  const fetchBingoHistory = async () => {
+    try {
+      const today = new Date();
+      const targetDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+      const response = await apiClient.get(`/api/history/history/by-date?target_date=${targetDate}`);
+      const result = response.data;
+      // 백엔드 응답이 { data: [...] } 거나 직접 [...] 형태일 수 있으므로 두 경우 모두 방어
+      const history = Array.isArray(result.data) ? result.data : (Array.isArray(result) ? result : []);
+      setBingoHistory(history);
+    } catch (error) {
+      console.error('빙고 내역 API 호출 오류:', error);
+    } finally {
+      setIsBingoLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchBingoHistory = async () => {
-      try {
-        const today = new Date();
-        const targetDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-
-        const response = await apiClient.get(`/api/history/history/by-date?target_date=${targetDate}`);
-        const result = response.data;
-        // 백엔드 응답이 { data: [...] } 거나 직접 [...] 형태일 수 있으므로 두 경우 모두 방어
-        const history = Array.isArray(result.data) ? result.data : (Array.isArray(result) ? result : []);
-        setBingoHistory(history);
-      } catch (error) {
-        console.error('빙고 내역 API 호출 오류:', error);
-      } finally {
-        setIsBingoLoading(false);
-      }
-    };
-
     fetchBingoHistory();
   }, []);
 
@@ -161,11 +163,37 @@ function MainPage() {
                   ));
                 }
 
-                return sortedCells.map((cell) => (
-                  <div key={cell.id} className="main-page__tile" role="listitem">
-                    {cell.mission_title}
-                  </div>
-                ));
+                return sortedCells.map((cell) => {
+                  const hasImage = !!cell.proof_image_url;
+                  let imageUrl = cell.proof_image_url;
+                  
+                  // 만약 이미지가 상대경로(/로 시작)로 내려오면 API Base URL을 붙여줍니다
+                  if (hasImage && imageUrl.startsWith('/')) {
+                    const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
+                    imageUrl = `${baseUrl}${imageUrl}`;
+                  }
+
+                  const bgStyle = hasImage
+                    ? {
+                        backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7)), url(${imageUrl})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                      }
+                    : {};
+
+                  return (
+                    <div 
+                      key={cell.id || cell.position} 
+                      className="main-page__tile" 
+                      role="button" 
+                      tabIndex={0}
+                      onClick={() => setSelectedCell(cell)}
+                      style={bgStyle}
+                    >
+                      {cell.mission_title}
+                    </div>
+                  );
+                });
               })()}
             </div>
 
@@ -200,6 +228,13 @@ function MainPage() {
         <p className="main-page__deadline">빙고 미션 달성 마감까지 {timeRemaining.hours}시간 {timeRemaining.minutes}분 남았습니다.</p>
       </div>
 
+      {selectedCell && (
+        <PhotoUploadModal 
+          cell={selectedCell} 
+          onClose={() => setSelectedCell(null)} 
+          onVerifySuccess={fetchBingoHistory}
+        />
+      )}
     </div>
   )
 }
