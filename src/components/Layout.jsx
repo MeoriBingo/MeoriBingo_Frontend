@@ -35,33 +35,33 @@ function Layout() {
 
             <nav className="layout__nav" aria-label="하단 메뉴">
                 <div className="layout__nav-inner">
-                    <button 
-                        type="button" 
-                        className={`layout__nav-item ${location.pathname === '/main' ? 'layout__nav-item--active' : ''}`} 
+                    <button
+                        type="button"
+                        className={`layout__nav-item ${location.pathname === '/main' ? 'layout__nav-item--active' : ''}`}
                         onClick={() => navigate('/main')}
                     >
                         <IconHome />
                         Home
                     </button>
-                    <button 
-                        type="button" 
-                        className={`layout__nav-item ${location.pathname === '/friend' ? 'layout__nav-item--active' : ''}`} 
+                    <button
+                        type="button"
+                        className={`layout__nav-item ${location.pathname === '/friend' ? 'layout__nav-item--active' : ''}`}
                         onClick={() => navigate('/friend')}
                     >
                         <IconCart />
                         Friend
                     </button>
-                    <button 
-                        type="button" 
-                        className={`layout__nav-item ${location.pathname === '/mypage' ? 'layout__nav-item--active' : ''}`} 
+                    <button
+                        type="button"
+                        className={`layout__nav-item ${location.pathname === '/mypage' ? 'layout__nav-item--active' : ''}`}
                         onClick={() => navigate('/mypage')}
                     >
                         <IconCart />
                         MyPage
                     </button>
-                    <button 
-                        type="button" 
-                        className={`layout__nav-item ${location.pathname === '/admin' ? 'layout__nav-item--active' : ''}`} 
+                    <button
+                        type="button"
+                        className={`layout__nav-item ${location.pathname === '/admin' ? 'layout__nav-item--active' : ''}`}
                         onClick={() => navigate('/admin')}
                     >
                         <IconCart />

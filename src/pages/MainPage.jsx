@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import apiClient from '../api/apiClient'
 import PhotoUploadModal from '../components/PhotoUploadModal'
+import BingoGenerateModal from '../components/BingoGenerateModal'
 import './MainPage.css'
 
 function IconRefresh() {
@@ -24,6 +25,7 @@ function MainPage() {
   const [bingoHistory, setBingoHistory] = useState(null);
   const [isBingoLoading, setIsBingoLoading] = useState(true);
   const [selectedCell, setSelectedCell] = useState(null);
+  const [showGenerateModal, setShowGenerateModal] = useState(false);
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -92,7 +94,7 @@ function MainPage() {
     return () => clearInterval(timerId);
   }, []);
 
-  const handleGenerateBingo = async () => {
+  const handleGenerateBingo = async (params) => {
     try {
       const userStr = localStorage.getItem('user');
       if (!userStr) {
@@ -100,19 +102,24 @@ function MainPage() {
         return;
       }
       const user = JSON.parse(userStr);
-      const response = await apiClient.post('/api/bingo/generate', { user_id: user.id });
+      const response = await apiClient.post('/api/bingo/generate', { 
+        user_id: user.id,
+        category: params?.category,
+        mode: params?.mode
+      });
       const data = response.data;
       setBingoHistory([data]);
     } catch (error) {
       console.error('빙고 생성 API 호출 중 오류 발생:', error);
       alert('빙고 생성 중 오류가 발생했습니다.');
+      throw error; // Re-throw to be caught by the modal's try-catch
     }
   };
 
   const handleResetBingo = async () => {
     try {
       if (!window.confirm('빙고판을 재생성하시겠습니까? (기존 진행 내역이 초기화됩니다)')) return;
-      
+
       await apiClient.post('/api/bingo/reset');
       alert('빙고판이 초기화되었습니다. 새 빙고를 생성해주세요.');
       setBingoHistory([]); // Clear the history to show the generate button
@@ -166,7 +173,7 @@ function MainPage() {
                 return sortedCells.map((cell) => {
                   const hasImage = !!cell.proof_image_url;
                   let imageUrl = cell.proof_image_url;
-                  
+
                   // 만약 이미지가 상대경로(/로 시작)로 내려오면 API Base URL을 붙여줍니다
                   if (hasImage && imageUrl.startsWith('/')) {
                     const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
@@ -182,10 +189,10 @@ function MainPage() {
                     : {};
 
                   return (
-                    <div 
-                      key={cell.id || cell.position} 
-                      className="main-page__tile" 
-                      role="button" 
+                    <div
+                      key={cell.id || cell.position}
+                      className="main-page__tile"
+                      role="button"
                       tabIndex={0}
                       onClick={() => setSelectedCell(cell)}
                       style={bgStyle}
@@ -218,7 +225,7 @@ function MainPage() {
             }}
               onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#0056b3'}
               onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#007bff'}
-              onClick={handleGenerateBingo}
+              onClick={() => setShowGenerateModal(true)}
             >
               빙고 생성하기
             </button>
@@ -229,10 +236,17 @@ function MainPage() {
       </div>
 
       {selectedCell && (
-        <PhotoUploadModal 
-          cell={selectedCell} 
-          onClose={() => setSelectedCell(null)} 
+        <PhotoUploadModal
+          cell={selectedCell}
+          onClose={() => setSelectedCell(null)}
           onVerifySuccess={fetchBingoHistory}
+        />
+      )}
+
+      {showGenerateModal && (
+        <BingoGenerateModal
+          onClose={() => setShowGenerateModal(false)}
+          onGenerate={handleGenerateBingo}
         />
       )}
     </div>

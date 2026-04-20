@@ -39,7 +39,7 @@ function PhotoUploadModal({ cell, onClose, onVerifySuccess }) {
     if (!selectedFile) {
       fileInputRef.current?.click();
     } else {
-      
+
       try {
         setIsUploading(true);
         const formData = new FormData();
@@ -53,7 +53,7 @@ function PhotoUploadModal({ cell, onClose, onVerifySuccess }) {
             'Content-Type': 'multipart/form-data'
           }
         });
-        
+
         alert('인증이 완료되었습니다!');
         if (onVerifySuccess) onVerifySuccess();
         onClose();
@@ -74,9 +74,9 @@ function PhotoUploadModal({ cell, onClose, onVerifySuccess }) {
         </button>
         <h2 className="photo-modal__title">사진 인증</h2>
       </header>
-      
+
       <div className="photo-modal__content">
-        <div 
+        <div
           className="photo-modal__placeholder"
           onClick={() => {
             if (!selectedFile && fileInputRef.current) {
@@ -92,17 +92,17 @@ function PhotoUploadModal({ cell, onClose, onVerifySuccess }) {
           )}
         </div>
 
-        <input 
-          type="file" 
+        <input
+          type="file"
           accept="image/*"
           capture="environment"
-          ref={fileInputRef} 
-          style={{ display: 'none' }} 
-          onChange={handleFileChange} 
+          ref={fileInputRef}
+          style={{ display: 'none' }}
+          onChange={handleFileChange}
         />
 
-        <button 
-          className="photo-modal__upload-btn" 
+        <button
+          className="photo-modal__upload-btn"
           type="button"
           onClick={handleButtonClick}
           disabled={isUploading}
