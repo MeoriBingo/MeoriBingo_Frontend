@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import apiClient from '../api/apiClient';
 
 function FriendPage() {
     const [friends, setFriends] = useState([]);
@@ -7,31 +8,13 @@ function FriendPage() {
     useEffect(() => {
         const fetchFriends = async () => {
             try {
-                const token = localStorage.getItem('accessToken');
-                if (!token) {
-                    console.error('No access token found');
-                    setIsLoading(false);
-                    return;
-                }
-
-                const baseUrl = import.meta.env.VITE_API_BASE_URL;
-                // VITE_API_BASE_URL이 /로 끝나지 않는다고 가정하고 /api/social/friends를 붙임
-                const response = await fetch(`${baseUrl}/api/social/friends`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                if (response.ok) {
-                    const result = await response.json();
-                    // 응답이 { data: [...] } 거나 [...] 형태일 경우 대응
-                    const friendList = Array.isArray(result.data) 
-                        ? result.data 
-                        : (Array.isArray(result) ? result : Object.values(result).find(Array.isArray) || []);
-                    setFriends(friendList);
-                } else {
-                    console.error('Failed to fetch friends:', response.status);
-                }
+                const response = await apiClient.get('/api/social/friends');
+                const result = response.data;
+                // 응답이 { data: [...] } 거나 [...] 형태일 경우 대응
+                const friendList = Array.isArray(result.data) 
+                    ? result.data 
+                    : (Array.isArray(result) ? result : Object.values(result).find(Array.isArray) || []);
+                setFriends(friendList);
             } catch (error) {
                 console.error('API error:', error);
             } finally {

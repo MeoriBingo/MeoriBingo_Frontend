@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import apiClient from '../api/apiClient'
 import './MainPage.css'
 
 function IconRefresh() {
@@ -29,18 +30,13 @@ function MainPage() {
         if (userStr) {
           const user = JSON.parse(userStr);
           if (user && user.id) {
-            const baseUrl = import.meta.env.VITE_API_BASE_URL;
-            const response = await fetch(`${baseUrl}/api/users/${user.id}`);
-            if (response.ok) {
-              const data = await response.json();
-              setUserInfo({
-                nickname: data.nickname,
-                point: data.point,
-                streak_count: data.streak_count
-              });
-            } else {
-              console.error('유저 정보를 불러오는데 실패했습니다.');
-            }
+            const response = await apiClient.get(`/api/users/${user.id}`);
+            const data = response.data;
+            setUserInfo({
+              nickname: data.nickname,
+              point: data.point,
+              streak_count: data.streak_count
+            });
           }
         }
       } catch (error) {
@@ -54,30 +50,14 @@ function MainPage() {
   useEffect(() => {
     const fetchBingoHistory = async () => {
       try {
-        const token = localStorage.getItem('accessToken');
-        if (!token) {
-          setIsBingoLoading(false);
-          return;
-        }
-
-        const baseUrl = import.meta.env.VITE_API_BASE_URL;
         const today = new Date();
         const targetDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-        
-        const response = await fetch(`${baseUrl}/api/bingo/history/by-date?target_date=${targetDate}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        
-        if (response.ok) {
-          const result = await response.json();
-          // 백엔드 응답이 { data: [...] } 거나 직접 [...] 형태일 수 있으므로 두 경우 모두 방어
-          const history = Array.isArray(result.data) ? result.data : (Array.isArray(result) ? result : []);
-          setBingoHistory(history);
-        } else {
-          console.error('빙고 내역을 불러오는데 실패했습니다.');
-        }
+
+        const response = await apiClient.get(`/api/history/history/by-date?target_date=${targetDate}`);
+        const result = response.data;
+        // 백엔드 응답이 { data: [...] } 거나 직접 [...] 형태일 수 있으므로 두 경우 모두 방어
+        const history = Array.isArray(result.data) ? result.data : (Array.isArray(result) ? result : []);
+        setBingoHistory(history);
       } catch (error) {
         console.error('빙고 내역 API 호출 오류:', error);
       } finally {
@@ -113,33 +93,30 @@ function MainPage() {
   const handleGenerateBingo = async () => {
     try {
       const userStr = localStorage.getItem('user');
-      const token = localStorage.getItem('accessToken');
-      if (!userStr || !token) {
+      if (!userStr) {
         alert('로그인이 필요합니다.');
         return;
       }
       const user = JSON.parse(userStr);
-
-      const baseUrl = import.meta.env.VITE_API_BASE_URL;
-      const response = await fetch(`${baseUrl}/api/bingo/generate`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ user_id: user.id })
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setBingoHistory([data]);
-      } else {
-        console.error('빙고 생성에 실패했습니다.');
-        alert('빙고 생성에 실패했습니다.');
-      }
+      const response = await apiClient.post('/api/bingo/generate', { user_id: user.id });
+      const data = response.data;
+      setBingoHistory([data]);
     } catch (error) {
       console.error('빙고 생성 API 호출 중 오류 발생:', error);
       alert('빙고 생성 중 오류가 발생했습니다.');
+    }
+  };
+
+  const handleResetBingo = async () => {
+    try {
+      if (!window.confirm('빙고판을 재생성하시겠습니까? (기존 진행 내역이 초기화됩니다)')) return;
+      
+      await apiClient.post('/api/bingo/reset');
+      alert('빙고판이 초기화되었습니다. 새 빙고를 생성해주세요.');
+      setBingoHistory([]); // Clear the history to show the generate button
+    } catch (error) {
+      console.error('빙고 재생성 중 오류 발생:', error);
+      alert('빙고 재생성 중 오류가 발생했습니다.');
     }
   };
 
@@ -186,34 +163,34 @@ function MainPage() {
 
                 return sortedCells.map((cell) => (
                   <div key={cell.id} className="main-page__tile" role="listitem">
-                    {cell.mission_id}
+                    {cell.mission_title}
                   </div>
                 ));
               })()}
             </div>
 
-            <button type="button" className="main-page__regen">
+            <button type="button" className="main-page__regen" onClick={handleResetBingo}>
               <IconRefresh />
               빙고판 재생성
             </button>
           </>
         ) : (
           <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }}>
-            <button type="button" style={{ 
-              padding: '16px 32px', 
-              fontSize: '18px', 
-              backgroundColor: '#007bff', 
-              color: 'white', 
-              border: 'none', 
-              borderRadius: '12px', 
-              cursor: 'pointer', 
-              fontWeight: 'bold', 
+            <button type="button" style={{
+              padding: '16px 32px',
+              fontSize: '18px',
+              backgroundColor: '#007bff',
+              color: 'white',
+              border: 'none',
+              borderRadius: '12px',
+              cursor: 'pointer',
+              fontWeight: 'bold',
               boxShadow: '0 4px 12px rgba(0,123,255,0.3)',
               transition: 'background-color 0.2s'
             }}
-            onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#0056b3'}
-            onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#007bff'}
-            onClick={handleGenerateBingo}
+              onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#0056b3'}
+              onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#007bff'}
+              onClick={handleGenerateBingo}
             >
               빙고 생성하기
             </button>

@@ -21,7 +21,7 @@ function LoginPage() {
 
     return (
         <div className="login-container">
-            <h1>BINGO</h1>
+            <h1>BINGOO</h1>
             <p>오늘의 미션을 완성해보세요</p>
 
             <button className="login-btn" style={{ background: '#FEE500', cursor: 'pointer' }} onClick={handleKakaoLogin}>

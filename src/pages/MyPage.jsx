@@ -1,5 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
 import { UserContext } from '../contexts/UserContext';
+import apiClient from '../api/apiClient';
 
 function MyPage() {
     const { updateUser } = useContext(UserContext);
@@ -17,20 +18,14 @@ function MyPage() {
                     const user = JSON.parse(userStr);
                     if (user && user.id) {
                         setUserId(user.id);
-                        const baseUrl = import.meta.env.VITE_API_BASE_URL;
-                        const response = await fetch(`${baseUrl}/api/users/${user.id}`);
-                        if (response.ok) {
-                            const data = await response.json();
-                            const profileData = {
-                                nickname: data.nickname || '',
-                                email: data.email || ''
-                            };
-                            setOriginalProfile(profileData);
-                            setCurrentProfile(profileData);
-                        } else {
-                            console.error('Failed to fetch user info');
-                            alert('유저 정보를 불러오는데 실패했습니다.');
-                        }
+                        const response = await apiClient.get(`/api/users/${user.id}`);
+                        const data = response.data;
+                        const profileData = {
+                            nickname: data.nickname || '',
+                            email: data.email || ''
+                        };
+                        setOriginalProfile(profileData);
+                        setCurrentProfile(profileData);
                     }
                 }
             } catch (error) {
@@ -68,26 +63,15 @@ function MyPage() {
         }
 
         try {
-            const baseUrl = import.meta.env.VITE_API_BASE_URL;
-            const response = await fetch(`${baseUrl}/api/users/me/${userId}`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(body)
-            });
+            await apiClient.patch(`/api/users/me/${userId}`, body);
 
-            if (response.ok) {
-                alert('프로필이 성공적으로 수정되었습니다.');
-                setOriginalProfile(currentProfile);
-                setIsNicknameEditing(false);
-                setIsEmailEditing(false);
-                
-                // localStorage에 저장된 닉네임 등을 동기화 (전역 상태 업데이트 포함)
-                updateUser(body);
-            } else {
-                alert('프로필 수정에 실패했습니다.');
-            }
+            alert('프로필이 성공적으로 수정되었습니다.');
+            setOriginalProfile(currentProfile);
+            setIsNicknameEditing(false);
+            setIsEmailEditing(false);
+            
+            // localStorage에 저장된 닉네임 등을 동기화 (전역 상태 업데이트 포함)
+            updateUser(body);
         } catch (error) {
             console.error('Error updating profile:', error);
             alert('프로필 수정 중 오류가 발생했습니다.');

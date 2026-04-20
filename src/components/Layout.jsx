@@ -26,7 +26,7 @@ function Layout() {
     return (
         <div className="layout">
             <header className="layout__header">
-                <div className="layout__logo">BING-GOO</div>
+                <div className="layout__logo">BINGOO</div>
             </header>
 
             <main className="layout__content">
