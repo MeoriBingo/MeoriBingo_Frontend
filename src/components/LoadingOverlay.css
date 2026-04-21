@@ -1,0 +1,76 @@
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.loading-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 32px;
+  width: 100%;
+  max-width: 320px;
+}
+
+.loading-spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #08060d;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 24px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-message {
+  font-size: 16px;
+  font-weight: 600;
+  color: #08060d;
+  margin: 0 0 16px;
+  word-break: keep-all;
+}
+
+.loading-progress-bar {
+  width: 100%;
+  height: 6px;
+  background-color: #f0f0f0;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.loading-progress-fill {
+  height: 100%;
+  background-color: #08060d;
+  width: 0;
+  animation: progress 2.5s ease-in-out infinite;
+}
+
+@keyframes progress {
+  0% {
+    width: 0;
+    margin-left: 0;
+  }
+  50% {
+    width: 100%;
+    margin-left: 0;
+  }
+  100% {
+    width: 0;
+    margin-left: 100%;
+  }
+}

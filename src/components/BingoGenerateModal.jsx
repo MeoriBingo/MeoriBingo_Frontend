@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import LoadingOverlay from './LoadingOverlay';
 import './BingoGenerateModal.css';
 
 function IconBack() {
@@ -98,6 +99,8 @@ function BingoGenerateModal({ onClose, onGenerate }) {
           {isGenerating ? '생성 중...' : '빙고 생성하기'}
         </button>
       </div>
+
+      {isGenerating && <LoadingOverlay message="AI가 맞춤형 빙고를 생성 중입니다..." />}
     </div>
   );
 }

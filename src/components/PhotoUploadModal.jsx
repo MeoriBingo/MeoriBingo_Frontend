@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect, useContext } from 'react';
 import apiClient from '../api/apiClient';
 import { UserContext } from '../contexts/UserContext';
+import LoadingOverlay from './LoadingOverlay';
 import './PhotoUploadModal.css';
 
 function IconBack() {
@@ -59,12 +60,12 @@ function PhotoUploadModal({ cell, onClose, onVerifySuccess }) {
         });
 
         const data = response.data;
-        
+
         if (data.is_success) {
           const userId = user?.id || user?.user_id;
 
           // 1. 빙고칸 완료 처리
-          await apiClient.post(`/api/bingo/cells/${targetCellId}`);
+          await apiClient.patch(`/api/bingo/cells/${targetCellId}`);
 
           // 2. 포인트 부여
           await apiClient.post(`/api/admin/point/${userId}`, {
@@ -75,10 +76,10 @@ function PhotoUploadModal({ cell, onClose, onVerifySuccess }) {
           // 3. 미션 성공내역 및 스트릭 업데이트를 위한 유저 정보 조회
           const userResponse = await apiClient.get(`/api/users/${userId}`);
           const userData = userResponse.data;
-          
+
           let streak_count = userData.streak_count || 0;
           let last_completed_date = userData.last_completed_date;
-          
+
           const today = new Date();
           // 로컬 시간을 기준으로 날짜 문자열 (YYYY-MM-DD) 생성
           const year = today.getFullYear();
@@ -92,7 +93,7 @@ function PhotoUploadModal({ cell, onClose, onVerifySuccess }) {
           } else {
             const lastDate = new Date(last_completed_date);
             const currentDate = new Date(todayStr);
-            
+
             const diffTime = currentDate.getTime() - lastDate.getTime();
             const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
 
@@ -106,7 +107,7 @@ function PhotoUploadModal({ cell, onClose, onVerifySuccess }) {
               streak_count = 1;
             }
           }
-          
+
           last_completed_date = todayStr;
 
           // 서버에 스트릭 정보 업데이트
@@ -140,7 +141,7 @@ function PhotoUploadModal({ cell, onClose, onVerifySuccess }) {
     if (isSuccess && onVerifySuccess) {
       onVerifySuccess();
     }
-    
+
     // 인증 실패 시 사진 초기화하여 다시 올릴 수 있게 함
     if (!isSuccess) {
       setSelectedFile(null);
@@ -148,10 +149,14 @@ function PhotoUploadModal({ cell, onClose, onVerifySuccess }) {
         URL.revokeObjectURL(previewUrl);
         setPreviewUrl(null);
       }
+      // HTML 인풋 요소의 값을 초기화해야 동일한 파일 재선택 시 onChange가 발생함
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
 
     setResultMessage(null);
-    
+
     if (isSuccess) {
       onClose();
     }
@@ -212,6 +217,8 @@ function PhotoUploadModal({ cell, onClose, onVerifySuccess }) {
           </ul>
         </section>
       </div>
+
+      {isUploading && <LoadingOverlay message="AI가 사진을 분석하고 있습니다..." />}
 
       {resultMessage && (
         <div className="result-overlay">
