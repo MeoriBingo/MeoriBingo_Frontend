@@ -30,8 +30,9 @@ function BingoGenerateModal({ onClose, onGenerate }) {
   const handleGenerate = async () => {
     setIsGenerating(true);
     try {
+      const categoryLabel = CATEGORIES.find(cat => cat.id === selectedCategory)?.label || selectedCategory;
       await onGenerate({
-        category: selectedCategory,
+        category: categoryLabel,
         mode: selectedMode
       });
       onClose();
