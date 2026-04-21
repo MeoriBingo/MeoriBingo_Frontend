@@ -1,11 +1,17 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import apiClient from '../api/apiClient';
+import { UserContext } from '../contexts/UserContext';
 
 function FriendPage() {
+    const { user } = useContext(UserContext);
     const [friends, setFriends] = useState([]);
     const [sentRequests, setSentRequests] = useState(null);
     const [receivedRequests, setReceivedRequests] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+
+    const [searchNickname, setSearchNickname] = useState('');
+    const [searchResults, setSearchResults] = useState([]);
+    const [isSearching, setIsSearching] = useState(false);
 
     useEffect(() => {
         const fetchFriends = async () => {
@@ -68,8 +74,106 @@ function FriendPage() {
         fetchReceivedRequests();
     }, []);
 
+    const handleSearch = async () => {
+        if (!searchNickname.trim()) {
+            alert('검색할 닉네임을 입력해주세요.');
+            return;
+        }
+        setIsSearching(true);
+        try {
+            const response = await apiClient.get(`/api/social/friends/search?nickname=${searchNickname}`);
+            setSearchResults(Array.isArray(response.data) ? response.data : []);
+        } catch (error) {
+            console.error('Search API error:', error);
+            alert('검색 중 오류가 발생했습니다.');
+        } finally {
+            setIsSearching(false);
+        }
+    };
+
+    const handleRequestFriend = async (targetId) => {
+        if (!user || !user.id) {
+            alert('로그인 정보가 없습니다.');
+            return;
+        }
+        try {
+            await apiClient.post('/api/social/friends/requests', {
+                requester_id: user.id,
+                addressee_id: targetId
+            });
+            alert('친구 신청을 보냈습니다.');
+            // 보낸 요청 목록 갱신을 위해 페이지 새로고침 또는 상태 업데이트 가능
+            window.location.reload();
+        } catch (error) {
+            console.error('Friend request error:', error);
+            alert(error.response?.data?.message || '친구 신청에 실패했습니다.');
+        }
+    };
+
+    const handleRespondRequest = async (friendshipId, status) => {
+        if (!user || !user.id) {
+            alert('로그인 정보가 없습니다.');
+            return;
+        }
+        try {
+            await apiClient.patch(`/api/social/friends/requests/${friendshipId}`, {
+                user_id: user.id,
+                status: status
+            });
+            alert(status === 'ACCEPTED' ? '친구 신청을 수락했습니다.' : '친구 신청을 거절했습니다.');
+            window.location.reload();
+        } catch (error) {
+            console.error('Respond request error:', error);
+            alert(error.response?.data?.message || '처리에 실패했습니다.');
+        }
+    };
+
     return (
         <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', height: '100%', gap: '20px', boxSizing: 'border-box' }}>
+            {/* 최상단: 친구 검색 */}
+            <div style={{ backgroundColor: '#fff', borderRadius: '8px', padding: '15px', boxShadow: '0 2px 5px rgba(0,0,0,0.05)' }}>
+                <h3 style={{ marginTop: 0, marginBottom: '15px', color: '#333' }}>친구 찾기</h3>
+                <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
+                    <input
+                        type="text"
+                        placeholder="닉네임 검색"
+                        value={searchNickname}
+                        onChange={(e) => setSearchNickname(e.target.value)}
+                        onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                        style={{ flex: 1, padding: '10px', borderRadius: '4px', border: '1px solid #ddd', fontSize: '14px' }}
+                    />
+                    <button
+                        onClick={handleSearch}
+                        disabled={isSearching}
+                        style={{ padding: '10px 20px', borderRadius: '4px', border: 'none', backgroundColor: '#007bff', color: '#fff', cursor: 'pointer', fontWeight: 'bold' }}
+                    >
+                        {isSearching ? '검색 중...' : '검색'}
+                    </button>
+                </div>
+                {searchResults.length > 0 && (
+                    <ul style={{ listStyleType: 'none', padding: 0, margin: 0 }}>
+                        {searchResults.map((result) => (
+                            <li key={result.id} style={{ padding: '10px', borderBottom: '1px solid #f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    {result.profile_image_url ? (
+                                        <img src={result.profile_image_url} alt={result.nickname} style={{ width: '32px', height: '32px', borderRadius: '50%' }} />
+                                    ) : (
+                                        <span style={{ fontSize: '24px' }}>👤</span>
+                                    )}
+                                    <span style={{ fontWeight: 500 }}>{result.nickname}</span>
+                                </div>
+                                <button
+                                    onClick={() => handleRequestFriend(result.id)}
+                                    style={{ padding: '5px 12px', borderRadius: '4px', border: '1px solid #007bff', backgroundColor: '#fff', color: '#007bff', cursor: 'pointer', fontSize: '13px' }}
+                                >
+                                    친구 신청
+                                </button>
+                            </li>
+                        ))}
+                    </ul>
+                )}
+            </div>
+
             {/* 상단: 현재 친구 목록 */}
             <div style={{ flex: 1, backgroundColor: '#fff', borderRadius: '8px', padding: '15px', boxShadow: '0 2px 5px rgba(0,0,0,0.05)', overflowY: 'auto' }}>
                 <h3 style={{ marginTop: 0, marginBottom: '15px', borderBottom: '1px solid #eaeaea', paddingBottom: '10px', color: '#333' }}>현재 친구 목록</h3>
@@ -123,10 +227,30 @@ function FriendPage() {
                     ) : Array.isArray(receivedRequests) && receivedRequests.length > 0 ? (
                         <ul style={{ listStyleType: 'none', padding: 0, margin: 0 }}>
                             {receivedRequests.map((req, idx) => (
-                                <li key={idx} style={{ padding: '8px 0', borderBottom: '1px solid #f9f9f9', fontSize: '14px', color: '#444' }}>
-                                    <span style={{ marginRight: '8px' }}>📥</span>
-                                    {req.nickname}
-                                    <span style={{ marginLeft: '10px', fontSize: '12px', color: '#999' }}>({req.status})</span>
+                                <li key={idx} style={{ padding: '12px 0', borderBottom: '1px solid #f9f9f9', fontSize: '14px', color: '#444' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                                        <div>
+                                            <span style={{ marginRight: '8px' }}>📥</span>
+                                            <span style={{ fontWeight: 500 }}>{req.nickname}</span>
+                                            <span style={{ marginLeft: '10px', fontSize: '12px', color: '#999' }}>({req.status})</span>
+                                        </div>
+                                        {req.status === 'PENDING' && (
+                                            <div style={{ display: 'flex', gap: '5px' }}>
+                                                <button
+                                                    onClick={() => handleRespondRequest(req.friendship_id, 'ACCEPTED')}
+                                                    style={{ padding: '4px 8px', borderRadius: '4px', border: 'none', backgroundColor: '#28a745', color: '#fff', cursor: 'pointer', fontSize: '12px' }}
+                                                >
+                                                    수락
+                                                </button>
+                                                <button
+                                                    onClick={() => handleRespondRequest(req.friendship_id, 'REJECTED')}
+                                                    style={{ padding: '4px 8px', borderRadius: '4px', border: 'none', backgroundColor: '#dc3545', color: '#fff', cursor: 'pointer', fontSize: '12px' }}
+                                                >
+                                                    거절
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
                                 </li>
                             ))}
                         </ul>
