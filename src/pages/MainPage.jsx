@@ -27,27 +27,27 @@ function MainPage() {
   const [selectedCell, setSelectedCell] = useState(null);
   const [showGenerateModal, setShowGenerateModal] = useState(false);
 
-  useEffect(() => {
-    const fetchUserInfo = async () => {
-      try {
-        const userStr = localStorage.getItem('user');
-        if (userStr) {
-          const user = JSON.parse(userStr);
-          if (user && user.id) {
-            const response = await apiClient.get(`/api/users/${user.id}`);
-            const data = response.data;
-            setUserInfo({
-              nickname: data.nickname,
-              point: data.point,
-              streak_count: data.streak_count
-            });
-          }
+  const fetchUserInfo = async () => {
+    try {
+      const userStr = localStorage.getItem('user');
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        if (user && user.id) {
+          const response = await apiClient.get(`/api/users/${user.id}`);
+          const data = response.data;
+          setUserInfo({
+            nickname: data.nickname,
+            point: data.point,
+            streak_count: data.streak_count
+          });
         }
-      } catch (error) {
-        console.error('API 호출 중 오류 발생:', error);
       }
-    };
+    } catch (error) {
+      console.error('API 호출 중 오류 발생:', error);
+    }
+  };
 
+  useEffect(() => {
     fetchUserInfo();
   }, []);
 
@@ -239,7 +239,10 @@ function MainPage() {
         <PhotoUploadModal
           cell={selectedCell}
           onClose={() => setSelectedCell(null)}
-          onVerifySuccess={fetchBingoHistory}
+          onVerifySuccess={() => {
+            fetchBingoHistory();
+            fetchUserInfo();
+          }}
         />
       )}
 

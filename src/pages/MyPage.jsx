@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext, useMemo } from 'react';
 import { UserContext } from '../contexts/UserContext';
 import apiClient from '../api/apiClient';
 
@@ -46,7 +46,7 @@ function MyPage() {
                         month: currentMonth
                     }
                 });
-                setMonthlyData(response.data);
+                setMonthlyData(Array.isArray(response.data) ? response.data : []);
             } catch (error) {
                 console.error('월간 히스토리 조회 실패:', error);
                 setMonthlyData({ error: '데이터를 불러오지 못했습니다.' });
@@ -56,6 +56,30 @@ function MyPage() {
         fetchUserInfo();
         fetchMonthlyHistory();
     }, []);
+
+    // 차트 데이터 가공
+    const chartData = useMemo(() => {
+        if (!Array.isArray(monthlyData)) return [];
+
+        const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
+        const counts = Array.from({ length: daysInMonth }, (_, i) => ({ day: i + 1, count: 0 }));
+
+        monthlyData.forEach(item => {
+            if (item.is_completed && item.completed_at) {
+                const day = new Date(item.completed_at).getDate();
+                if (day >= 1 && day <= daysInMonth) {
+                    counts[day - 1].count += 1;
+                }
+            }
+        });
+
+        return counts;
+    }, [monthlyData]);
+
+    const maxCount = useMemo(() => {
+        const counts = chartData.map(d => d.count);
+        return counts.length > 0 ? Math.max(...counts, 5) : 5; // 최소 높이 5 보장
+    }, [chartData]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -91,7 +115,6 @@ function MyPage() {
             setIsNicknameEditing(false);
             setIsEmailEditing(false);
 
-            // localStorage에 저장된 닉네임 등을 동기화 (전역 상태 업데이트 포함)
             updateUser(body);
         } catch (error) {
             console.error('Error updating profile:', error);
@@ -100,76 +123,116 @@ function MyPage() {
     };
 
     return (
-        <div style={{ padding: '20px', maxWidth: '400px', margin: '0 auto' }}>
-            <h2 style={{ marginBottom: '20px', textAlign: 'center' }}>마이페이지</h2>
+        <div style={{ padding: '20px', maxWidth: '430px', margin: '0 auto', boxSizing: 'border-box' }}>
+            <h2 style={{ marginBottom: '24px', textAlign: 'center', fontWeight: '800' }}>마이페이지</h2>
 
-            {/* 상단 섹션: 유저 집계 정보 (JSON 출력) */}
-            <div style={{ marginBottom: '40px', padding: '15px', backgroundColor: '#f8f9fa', borderRadius: '8px', border: '1px solid #ddd' }}>
-                <h3 style={{ marginTop: 0, fontSize: '18px', color: '#333' }}>월간 집계 정보 (준비 중)</h3>
-                <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all', fontSize: '12px', color: '#555', maxHeight: '200px', overflowY: 'auto' }}>
-                    {monthlyData ? JSON.stringify(monthlyData, null, 2) : '로딩 중...'}
-                </pre>
+            {/* 상단 섹션: 월간 집계 정보 */}
+            <div style={{ marginBottom: '32px', padding: '24px', backgroundColor: '#ffffff', borderRadius: '16px', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
+                <h3 style={{ marginTop: 0, marginBottom: '16px', fontSize: '18px', fontWeight: '700', color: '#08060d' }}>월간 활동 리포트</h3>
+                
+                {Array.isArray(monthlyData) ? (
+                    <>
+                        <p style={{ fontSize: '15px', color: '#444', marginBottom: '24px', lineHeight: '1.5' }}>
+                            이번 달 현재까지 달성한 미션의 갯수는 <strong style={{ color: '#007bff', fontSize: '18px' }}>{monthlyData.filter(i => i.is_completed).length}개</strong> 입니다.
+                        </p>
+
+                        {/* 커스텀 막대 그래프 */}
+                        <div style={{ height: '180px', display: 'flex', alignItems: 'flex-end', gap: '2px', paddingBottom: '20px', borderBottom: '1px solid #eee', marginBottom: '10px' }}>
+                            {chartData.map((data) => (
+                                <div 
+                                    key={data.day} 
+                                    style={{ 
+                                        flex: 1, 
+                                        height: `${(data.count / maxCount) * 100}%`, 
+                                        backgroundColor: data.count > 0 ? '#007bff' : '#f0f0f0',
+                                        borderRadius: '2px 2px 0 0',
+                                        position: 'relative',
+                                        minHeight: data.count > 0 ? '4px' : '0'
+                                    }}
+                                    title={`${data.day}일: ${data.count}개`}
+                                >
+                                    {data.count > 0 && (
+                                        <span style={{ position: 'absolute', top: '-18px', left: '50%', transform: 'translateX(-50%)', fontSize: '10px', fontWeight: 'bold', color: '#007bff' }}>
+                                            {data.count}
+                                        </span>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: '#999', padding: '0 4px' }}>
+                            <span>1일</span>
+                            <span>15일</span>
+                            <span>{chartData.length}일</span>
+                        </div>
+                    </>
+                ) : monthlyData?.error ? (
+                    <p style={{ color: '#dc3545', textAlign: 'center' }}>{monthlyData.error}</p>
+                ) : (
+                    <p style={{ textAlign: 'center', color: '#999' }}>데이터를 불러오는 중...</p>
+                )}
             </div>
 
-            {/* 하단 섹션: 닉네임, 이메일 수정 */}
-            <div style={{ borderTop: '2px solid #eee', paddingTop: '30px' }}>
-                <h3 style={{ marginBottom: '20px', fontSize: '18px', color: '#333' }}>내 프로필 관리</h3>
-                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                    <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '15px' }}>
-                        <label htmlFor="nickname" style={{ width: '60px', fontWeight: 'bold' }}>닉네임</label>
-                        <input
-                            type="text"
-                            id="nickname"
-                            name="nickname"
-                            value={currentProfile.nickname}
-                            onChange={handleChange}
-                            disabled={!isNicknameEditing}
-                            style={{ padding: '8px', fontSize: '16px', flex: 1, backgroundColor: isNicknameEditing ? 'white' : '#f0f0f0', color: isNicknameEditing ? '#333' : '#666', border: '1px solid #ccc', borderRadius: '4px' }}
-                        />
-                        <button
-                            type="button"
-                            onClick={() => {
-                                if (isNicknameEditing) {
-                                    setCurrentProfile(prev => ({ ...prev, nickname: originalProfile.nickname }));
-                                }
-                                setIsNicknameEditing(!isNicknameEditing);
-                            }}
-                            style={{ padding: '8px 12px', cursor: 'pointer', backgroundColor: isNicknameEditing ? '#6c757d' : '#28a745', color: 'white', border: 'none', borderRadius: '4px' }}
-                        >
-                            {isNicknameEditing ? '취소' : 'EDIT'}
-                        </button>
+            {/* 하단 섹션: 내 프로필 관리 */}
+            <div style={{ backgroundColor: '#ffffff', padding: '24px', borderRadius: '16px', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
+                <h3 style={{ marginTop: 0, marginBottom: '24px', fontSize: '18px', fontWeight: '700', color: '#08060d' }}>내 프로필 관리</h3>
+                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        <label htmlFor="nickname" style={{ fontSize: '14px', fontWeight: '600', color: '#666' }}>닉네임</label>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                            <input
+                                type="text"
+                                id="nickname"
+                                name="nickname"
+                                value={currentProfile.nickname}
+                                onChange={handleChange}
+                                disabled={!isNicknameEditing}
+                                style={{ padding: '12px', fontSize: '15px', flex: 1, backgroundColor: isNicknameEditing ? 'white' : '#f8f8f8', color: '#333', border: '1px solid #eee', borderRadius: '12px', outline: 'none' }}
+                            />
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    if (isNicknameEditing) {
+                                        setCurrentProfile(prev => ({ ...prev, nickname: originalProfile.nickname }));
+                                    }
+                                    setIsNicknameEditing(!isNicknameEditing);
+                                }}
+                                style={{ padding: '0 16px', cursor: 'pointer', backgroundColor: isNicknameEditing ? '#f0f0f0' : '#08060d', color: isNicknameEditing ? '#666' : 'white', border: 'none', borderRadius: '12px', fontSize: '13px', fontWeight: '600' }}
+                            >
+                                {isNicknameEditing ? '취소' : '수정'}
+                            </button>
+                        </div>
                     </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '15px' }}>
-                        <label htmlFor="email" style={{ width: '60px', fontWeight: 'bold' }}>이메일</label>
-                        <input
-                            type="email"
-                            id="email"
-                            name="email"
-                            value={currentProfile.email}
-                            onChange={handleChange}
-                            disabled={!isEmailEditing}
-                            style={{ padding: '8px', fontSize: '16px', flex: 1, backgroundColor: isEmailEditing ? 'white' : '#f0f0f0', color: isEmailEditing ? '#333' : '#666', border: '1px solid #ccc', borderRadius: '4px' }}
-                        />
-                        <button
-                            type="button"
-                            onClick={() => {
-                                if (isEmailEditing) {
-                                    setCurrentProfile(prev => ({ ...prev, email: originalProfile.email }));
-                                }
-                                setIsEmailEditing(!isEmailEditing);
-                            }}
-                            style={{ padding: '8px 12px', cursor: 'pointer', backgroundColor: isEmailEditing ? '#6c757d' : '#28a745', color: 'white', border: 'none', borderRadius: '4px' }}
-                        >
-                            {isEmailEditing ? '취소' : 'EDIT'}
-                        </button>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        <label htmlFor="email" style={{ fontSize: '14px', fontWeight: '600', color: '#666' }}>이메일</label>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                            <input
+                                type="email"
+                                id="email"
+                                name="email"
+                                value={currentProfile.email}
+                                onChange={handleChange}
+                                disabled={!isEmailEditing}
+                                style={{ padding: '12px', fontSize: '15px', flex: 1, backgroundColor: isEmailEditing ? 'white' : '#f8f8f8', color: '#333', border: '1px solid #eee', borderRadius: '12px', outline: 'none' }}
+                            />
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    if (isEmailEditing) {
+                                        setCurrentProfile(prev => ({ ...prev, email: originalProfile.email }));
+                                    }
+                                    setIsEmailEditing(!isEmailEditing);
+                                }}
+                                style={{ padding: '0 16px', cursor: 'pointer', backgroundColor: isEmailEditing ? '#f0f0f0' : '#08060d', color: isEmailEditing ? '#666' : 'white', border: 'none', borderRadius: '12px', fontSize: '13px', fontWeight: '600' }}
+                            >
+                                {isEmailEditing ? '취소' : '수정'}
+                            </button>
+                        </div>
                     </div>
 
-                    <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-                        <button type="submit" style={{ flex: 1, padding: '12px', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>
-                            수정하기
-                        </button>
-                    </div>
+                    <button type="submit" style={{ marginTop: '8px', padding: '16px', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer', fontWeight: '700', fontSize: '16px', boxShadow: '0 4px 12px rgba(0,123,255,0.2)' }}>
+                        저장하기
+                    </button>
                 </form>
             </div>
         </div>

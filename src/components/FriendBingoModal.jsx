@@ -1,0 +1,120 @@
+import React, { useState, useEffect } from 'react';
+import apiClient from '../api/apiClient';
+import LoadingOverlay from './LoadingOverlay';
+import './FriendBingoModal.css';
+
+function IconBack() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M19 12H5M12 19l-7-7 7-7" />
+    </svg>
+  );
+}
+
+function FriendBingoModal({ friend, onClose }) {
+  const [bingoBoard, setBingoBoard] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchFriendBingo = async () => {
+      try {
+        setIsLoading(true);
+        const response = await apiClient.get(`/api/bingo/active?user_id=${friend.user_id}`);
+        if (isMounted) {
+          setBingoBoard(response.data);
+        }
+      } catch (error) {
+        console.error('친구 빙고 데이터 로드 실패:', error);
+        if (isMounted) {
+          alert('친구의 빙고판 정보를 불러오지 못했습니다.');
+          onClose();
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    if (friend && friend.user_id) {
+      fetchFriendBingo();
+    }
+
+    return () => {
+      isMounted = false;
+    };
+  }, [friend.user_id]); // friend 객체 전체 대신 user_id만 감시하고 onClose는 제외하여 안정성 확보
+
+  if (!friend) return null;
+
+  return (
+    <div className="friend-bingo-modal">
+      <header className="friend-bingo-modal__header">
+        <button className="friend-bingo-modal__back" onClick={onClose} aria-label="뒤로가기">
+          <IconBack />
+        </button>
+        <h2 className="friend-bingo-modal__title">{friend.nickname}님의 빙고판</h2>
+      </header>
+
+      <div className="friend-bingo-modal__content">
+        {isLoading ? (
+          <LoadingOverlay message="친구의 빙고판을 불러오는 중..." />
+        ) : bingoBoard ? (
+          <>
+            <div className="friend-bingo-modal__info">
+              <span className="friend-bingo-modal__badge">{bingoBoard.category}</span>
+              <span className="friend-bingo-modal__badge">{bingoBoard.mode}</span>
+              <span className="friend-bingo-modal__status">달성: {bingoBoard.completed_count} / 9</span>
+            </div>
+
+            <div className="friend-bingo-grid">
+              {(() => {
+                const cells = bingoBoard.cells || [];
+                const sortedCells = [...cells].sort((a, b) => a.position - b.position);
+
+                return sortedCells.map((cell) => {
+                  const hasImage = !!cell.proof_image_url;
+                  let imageUrl = cell.proof_image_url;
+
+                  if (hasImage && imageUrl.startsWith('/')) {
+                    const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
+                    imageUrl = `${baseUrl}${imageUrl}`;
+                  }
+
+                  const bgStyle = hasImage
+                    ? {
+                        backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7)), url(${imageUrl})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                      }
+                    : {};
+
+                  return (
+                    <div
+                      key={cell.id || cell.position}
+                      className={`friend-bingo-tile ${cell.is_completed ? 'friend-bingo-tile--completed' : ''}`}
+                      style={bgStyle}
+                    >
+                      <span className="friend-bingo-tile__title">{cell.mission_title}</span>
+                      {cell.is_completed && <span className="friend-bingo-tile__check">✅</span>}
+                    </div>
+                  );
+                });
+              })()}
+            </div>
+            
+            <p className="friend-bingo-modal__footer">
+              친구의 빙고판은 조회만 가능합니다.
+            </p>
+          </>
+        ) : (
+          <p className="friend-bingo-modal__empty">활성화된 빙고판이 없습니다.</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default FriendBingoModal;

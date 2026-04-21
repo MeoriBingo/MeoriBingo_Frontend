@@ -111,7 +111,7 @@ function PhotoUploadModal({ cell, onClose, onVerifySuccess }) {
           last_completed_date = todayStr;
 
           // 서버에 스트릭 정보 업데이트
-          await apiClient.post(`/api/users/mission/${userId}`, {
+          await apiClient.patch(`/api/users/mission/${userId}`, {
             streak_count,
             last_completed_date
           });
