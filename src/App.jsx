@@ -8,13 +8,29 @@ import KakaoCallbackPage from './pages/KakaoCallbackPage'
 import LoginFailPage from './pages/LoginFailPage'
 import { UserProvider } from './contexts/UserContext'
 import Layout from './components/Layout'
+import PhotoUploadModal from './components/PhotoUploadModal'
 
 function App() {
+  const photoPreviewCell = {
+    id: 1,
+    mission_title: '샘플 미션',
+  }
+
   return (
     <UserProvider>
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<LoginPage />} />
+          <Route
+            path="/photouploadmodal"
+            element={
+              <PhotoUploadModal
+                cell={photoPreviewCell}
+                onClose={() => window.history.back()}
+                onVerifySuccess={() => {}}
+              />
+            }
+          />
           <Route path="/auth/kakao/callback" element={<KakaoCallbackPage />} />
           <Route path="/login-fail" element={<LoginFailPage />} />
 

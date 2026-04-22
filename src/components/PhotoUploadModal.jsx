@@ -12,6 +12,20 @@ function IconBack() {
   );
 }
 
+function IconArrowRight() {
+  return (
+    <svg className="photo-modal__upload-btn-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M5 12h14M13 6l6 6-6 6"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 function PhotoUploadModal({ cell, onClose, onVerifySuccess }) {
   const { user, updateUser } = useContext(UserContext);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -40,12 +54,22 @@ function PhotoUploadModal({ cell, onClose, onVerifySuccess }) {
     }
   };
 
+  const handleRemovePhoto = (e) => {
+    e.stopPropagation();
+    setSelectedFile(null);
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+      setPreviewUrl(null);
+    }
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   const handleButtonClick = async () => {
-    if (!selectedFile) {
-      fileInputRef.current?.click();
-    } else {
-      try {
-        setIsUploading(true);
+    if (!selectedFile) return;
+    try {
+      setIsUploading(true);
         const formData = new FormData();
         formData.append('file', selectedFile);
 
@@ -134,7 +158,6 @@ function PhotoUploadModal({ cell, onClose, onVerifySuccess }) {
       } finally {
         setIsUploading(false);
       }
-    }
   };
 
   const handleCloseResult = () => {
@@ -173,7 +196,7 @@ function PhotoUploadModal({ cell, onClose, onVerifySuccess }) {
 
       <div className="photo-modal__content">
         <div
-          className="photo-modal__placeholder"
+          className={`photo-modal__placeholder${previewUrl ? ' photo-modal__placeholder--preview' : ''}`}
           onClick={() => {
             if (!selectedFile && fileInputRef.current) {
               fileInputRef.current.click();
@@ -182,9 +205,27 @@ function PhotoUploadModal({ cell, onClose, onVerifySuccess }) {
           style={{ cursor: selectedFile ? 'default' : 'pointer' }}
         >
           {previewUrl ? (
-            <img src={previewUrl} alt="미션 인증 미리보기" className="photo-modal__preview-image" />
+            <div className="photo-modal__preview-wrap">
+              <img src={previewUrl} alt="미션 인증 미리보기" className="photo-modal__preview-image" />
+              <button
+                type="button"
+                className="photo-modal__remove-photo"
+                onClick={handleRemovePhoto}
+                aria-label="선택한 사진 삭제"
+              >
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                  <path d="M4.5 4.5l9 9M13.5 4.5l-9 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                </svg>
+              </button>
+            </div>
           ) : (
-            <span className="photo-modal__placeholder-text">터치하여 사진 선택</span>
+            <div className="photo-modal__empty">
+              <div className="photo-modal__empty-icon-circle">
+                <i className="fa-solid fa-photo-film photo-modal__fa-photo" aria-hidden="true" />
+              </div>
+              <p className="photo-modal__empty-title">터치하여 사진 업로드</p>
+              <p className="photo-modal__empty-subtitle">물체가 선명하게 보이도록 해주세요</p>
+            </div>
           )}
         </div>
 
@@ -198,23 +239,63 @@ function PhotoUploadModal({ cell, onClose, onVerifySuccess }) {
         />
 
         <button
-          className="photo-modal__upload-btn"
+          className={`photo-modal__upload-btn${isUploading ? ' photo-modal__upload-btn--busy' : ''}`}
           type="button"
           onClick={handleButtonClick}
-          disabled={isUploading}
+          disabled={!selectedFile || isUploading}
         >
-          {isUploading ? '업로드 중...' : (selectedFile ? '인증하기' : '사진 업로드 하기')}
+          {isUploading ? (
+            '인증 중...'
+          ) : (
+            <>
+              <span>사진 인증하기</span>
+              <IconArrowRight />
+            </>
+          )}
         </button>
 
-        <section className="photo-modal__guide">
-          <h3 className="photo-modal__guide-title">사진 업로드 가이드</h3>
-          <ul className="photo-modal__guide-list">
-            <li>인증할 사진에 대한 가이드 출력 부분</li>
+        <section className="photo-modal__guide-card" aria-labelledby="photo-upload-guide-heading">
+          <div className="photo-modal__guide-head">
+            <span className="photo-modal__guide-info-wrap" aria-hidden="true">
+              <i className="fa-solid fa-circle-info photo-modal__guide-info-fa" aria-hidden="true" />
+            </span>
+            <h3 id="photo-upload-guide-heading" className="photo-modal__guide-heading">
+              사진 업로드 가이드
+            </h3>
+          </div>
+          <ul className="photo-modal__guide-bullets">
+            <li>부적절·선정적이거나 타인의 초상권을 침해하는 사진은 업로드할 수 없습니다.</li>
+            <li>미션과 무관한 사진, 화면 캡처·도용 이미지는 인증이 거절될 수 있습니다.</li>
             <li>
-              ex) {cell.mission_title} 챌린지인 경우<br />
-              "{cell.mission_title} 사진을 선명하게 촬영해주세요"
+              이번 미션(<strong>{cell.mission_title || '미션'}</strong>)에 맞는 물품·장면이 한눈에 보이도록 밝고 선명하게 촬영해 주세요.
             </li>
+            <li>너무 어둡거나 흔들리고, 대상이 잘려 보이는 사진은 인증에 실패할 수 있습니다.</li>
+            <li>허위·조작된 사진은 서비스 이용 제재를 받을 수 있습니다.</li>
           </ul>
+          <div className="photo-modal__guide-examples">
+            <figure className="photo-modal__guide-example photo-modal__guide-example--good">
+              <div className="photo-modal__guide-example-inner">
+                <div className="photo-modal__guide-demo photo-modal__guide-demo--good" aria-hidden="true" />
+                <span className="photo-modal__guide-badge photo-modal__guide-badge--ok" aria-label="좋은 예시">
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                    <path d="M2.5 7.5L5.5 10.5L11.5 3.5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </span>
+              </div>
+              <figcaption className="photo-modal__guide-example-caption">좋은 예</figcaption>
+            </figure>
+            <figure className="photo-modal__guide-example photo-modal__guide-example--bad">
+              <div className="photo-modal__guide-example-inner">
+                <div className="photo-modal__guide-demo photo-modal__guide-demo--bad" aria-hidden="true" />
+                <span className="photo-modal__guide-badge photo-modal__guide-badge--bad" aria-label="나쁜 예시">
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                    <path d="M2 2L10 10M10 2L2 10" stroke="white" strokeWidth="2" strokeLinecap="round" />
+                  </svg>
+                </span>
+              </div>
+              <figcaption className="photo-modal__guide-example-caption">피할 예</figcaption>
+            </figure>
+          </div>
         </section>
       </div>
 
