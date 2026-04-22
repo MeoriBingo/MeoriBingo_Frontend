@@ -11,7 +11,7 @@ function AdminPage() {
   const fetchUsers = async () => {
     try {
       setIsLoading(true);
-      const response = await apiClient.get('/api/admin/point/all');
+      const response = await apiClient.get('/api/admin/user/all');
       setUsers(response.data);
     } catch (error) {
       console.error('사용자 목록 조회 실패:', error);
@@ -90,13 +90,13 @@ function AdminPage() {
                         onChange={(e) => setGrantAmount(e.target.value)}
                         autoFocus
                       />
-                      <button 
+                      <button
                         className="confirm-btn"
                         onClick={() => handleConfirmGrant(user.id)}
                       >
                         확인
                       </button>
-                      <button 
+                      <button
                         className="cancel-btn"
                         onClick={handleCancel}
                       >
@@ -104,7 +104,7 @@ function AdminPage() {
                       </button>
                     </div>
                   ) : (
-                    <button 
+                    <button
                       className="point-btn"
                       onClick={() => handleGrantClick(user.id)}
                     >
