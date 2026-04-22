@@ -1,6 +1,7 @@
 import { useState, useEffect, useContext } from 'react';
 import apiClient from '../api/apiClient';
 import { UserContext } from '../contexts/UserContext';
+import FriendBingoModal from '../components/FriendBingoModal';
 
 function FriendPage() {
     const { user } = useContext(UserContext);
@@ -13,12 +14,14 @@ function FriendPage() {
     const [searchResults, setSearchResults] = useState([]);
     const [isSearching, setIsSearching] = useState(false);
 
+    // 친구 빙고판 모달 상태
+    const [selectedFriend, setSelectedFriend] = useState(null);
+
     useEffect(() => {
         const fetchFriends = async () => {
             try {
                 const response = await apiClient.get('/api/social/friends');
                 const result = response.data;
-                // 응답이 { data: [...] } 거나 [...] 형태일 경우 대응
                 const friendList = Array.isArray(result.data)
                     ? result.data
                     : (Array.isArray(result) ? result : Object.values(result).find(Array.isArray) || []);
@@ -35,7 +38,6 @@ function FriendPage() {
                 const response = await apiClient.get('/api/social/friends/requests/sent');
                 const requests = Array.isArray(response.data) ? response.data : [];
                 
-                // 각 요청의 user_id를 사용하여 유저 상세 정보(닉네임)를 가져옴
                 const detailedRequests = await Promise.all(
                     requests.map(async (req) => {
                         try {
@@ -102,7 +104,6 @@ function FriendPage() {
                 addressee_id: targetId
             });
             alert('친구 신청을 보냈습니다.');
-            // 보낸 요청 목록 갱신을 위해 페이지 새로고침 또는 상태 업데이트 가능
             window.location.reload();
         } catch (error) {
             console.error('Friend request error:', error);
@@ -182,9 +183,21 @@ function FriendPage() {
                 ) : friends.length > 0 ? (
                     <ul style={{ listStyleType: 'none', padding: 0, margin: 0 }}>
                         {friends.map((friend, idx) => (
-                            <li key={idx} style={{ padding: '12px 10px', borderBottom: '1px solid #f0f0f0', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <li 
+                                key={idx} 
+                                style={{ 
+                                    padding: '12px 10px', 
+                                    borderBottom: '1px solid #f0f0f0', 
+                                    display: 'flex', 
+                                    alignItems: 'center', 
+                                    gap: '10px',
+                                    cursor: 'pointer'
+                                }}
+                                onClick={() => setSelectedFriend(friend)}
+                            >
                                 <span style={{ fontSize: '20px' }}>👤</span>
                                 <span style={{ fontWeight: 500, color: '#444' }}>{friend.nickname || '이름 없음'}</span>
+                                <span style={{ marginLeft: 'auto', fontSize: '12px', color: '#007bff' }}>빙고 보기</span>
                             </li>
                         ))}
                     </ul>
@@ -259,6 +272,14 @@ function FriendPage() {
                     )}
                 </div>
             </div>
+
+            {/* 친구 빙고판 모달 */}
+            {selectedFriend && (
+                <FriendBingoModal 
+                    friend={selectedFriend} 
+                    onClose={() => setSelectedFriend(null)} 
+                />
+            )}
         </div>
     );
 }
