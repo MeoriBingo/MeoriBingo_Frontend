@@ -21,16 +21,6 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<LoginPage />} />
-          <Route
-            path="/photouploadmodal"
-            element={
-              <PhotoUploadModal
-                cell={photoPreviewCell}
-                onClose={() => window.history.back()}
-                onVerifySuccess={() => {}}
-              />
-            }
-          />
           <Route path="/auth/kakao/callback" element={<KakaoCallbackPage />} />
           <Route path="/login-fail" element={<LoginFailPage />} />
 
