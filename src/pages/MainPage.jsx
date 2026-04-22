@@ -36,12 +36,31 @@ function MainPage() {
 
   const [timeRemaining, setTimeRemaining] = useState({ hours: '00', minutes: '00' });
   const [bingoHistory, setBingoHistory] = useState(null);
+  const [reactions, setReactions] = useState([]);
   const [isBingoLoading, setIsBingoLoading] = useState(true);
   const [selectedCell, setSelectedCell] = useState(null);
   const [showGenerateModal, setShowGenerateModal] = useState(false);
 
   const isUserFetched = useRef(false);
   const isHistoryFetched = useRef(false);
+
+  const REACTION_ICONS = {
+    HEART: '❤️',
+    FIRE: '🔥',
+    LIKE: '👍',
+    SMILE: '😊',
+    BAD: '👎',
+    CRY: '😢',
+  };
+
+  const fetchReactions = async (boardId) => {
+    try {
+      const response = await apiClient.get(`/api/social/reactions/boards/${boardId}/reactions`);
+      setReactions(response.data || []);
+    } catch (error) {
+      console.error('리액션 로드 실패:', error);
+    }
+  };
 
   const fetchUserInfo = async () => {
     try {
@@ -78,6 +97,10 @@ function MainPage() {
       const result = response.data;
       const history = Array.isArray(result.data) ? result.data : (Array.isArray(result) ? result : []);
       setBingoHistory(history);
+
+      if (history.length > 0 && history[0].id) {
+        await fetchReactions(history[0].id);
+      }
     } catch (error) {
       console.error('빙고 내역 API 호출 오류:', error);
       alert('빙고 내역을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.');
@@ -223,6 +246,23 @@ function MainPage() {
                 });
               })()}
             </div>
+
+            {reactions.length > 0 && (
+              <div className="main-page__reactions">
+                <p className="main-page__reactions-title">친구들의 반응</p>
+                <div className="main-page__reactions-list">
+                  {reactions.map((reaction) => (
+                    <span
+                      key={reaction.id}
+                      className="main-page__reaction-item"
+                      title={reaction.nickname}
+                    >
+                      {REACTION_ICONS[reaction.reaction_type] || '❓'}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <button type="button" className="main-page__regen" onClick={handleResetBingo}>
               <IconRefresh />
