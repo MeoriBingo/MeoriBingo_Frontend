@@ -48,6 +48,7 @@
 .photo-modal__placeholder {
   width: 100%;
   aspect-ratio: 1;
+  min-height: 33.33vh;
   box-sizing: border-box;
   background-color: #fff8d6;
   border: 2px solid #f0e5a2;
