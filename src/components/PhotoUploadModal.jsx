@@ -35,6 +35,14 @@ function PhotoUploadModal({ cell, onClose, onVerifySuccess }) {
   const [isSuccess, setIsSuccess] = useState(false);
   const fileInputRef = useRef(null);
 
+  // 블러 처리 관련 상태
+  const [isBlurMode, setIsBlurMode] = useState(false);
+  const [selection, setSelection] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startPos, setStartPos] = useState({ x: 0, y: 0 });
+  const imageRef = useRef(null);
+  const containerRef = useRef(null);
+
   useEffect(() => {
     // Cleanup preview URL
     return () => {
@@ -51,6 +59,8 @@ function PhotoUploadModal({ cell, onClose, onVerifySuccess }) {
       const file = e.target.files[0];
       setSelectedFile(file);
       setPreviewUrl(URL.createObjectURL(file));
+      setSelection(null);
+      setIsBlurMode(false);
     }
   };
 
@@ -64,9 +74,123 @@ function PhotoUploadModal({ cell, onClose, onVerifySuccess }) {
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
+    setSelection(null);
+    setIsBlurMode(false);
+  };
+
+  // 블러 처리 시작/취소
+  const toggleBlurMode = () => {
+    setIsBlurMode(!isBlurMode);
+    setSelection(null);
+  };
+
+  // 마우스/터치 이벤트 핸들러
+  const getCoordinates = (e) => {
+    const rect = containerRef.current.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return {
+      x: clientX - rect.left,
+      y: clientY - rect.top
+    };
+  };
+
+  const handleMouseDown = (e) => {
+    if (!isBlurMode) return;
+    const pos = getCoordinates(e);
+    setStartPos(pos);
+    setSelection({ x: pos.x, y: pos.y, width: 0, height: 0 });
+    setIsDragging(true);
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isBlurMode || !isDragging) return;
+    const pos = getCoordinates(e);
+    const newSelection = {
+      x: Math.min(pos.x, startPos.x),
+      y: Math.min(pos.y, startPos.y),
+      width: Math.abs(pos.x - startPos.x),
+      height: Math.abs(pos.y - startPos.y)
+    };
+    setSelection(newSelection);
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  // 실제 블러 적용 (Canvas 활용)
+  const applyBlur = async () => {
+    if (!selection || selection.width < 5 || selection.height < 5) return;
+
+    const img = imageRef.current;
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+
+    // 원본 이미지 크기로 캔버스 설정
+    canvas.width = img.naturalWidth;
+    canvas.height = img.naturalHeight;
+
+    // 1. 전체 이미지 그리기
+    ctx.drawImage(img, 0, 0);
+
+    // 2. 선택 영역 계산 (화면 좌표 -> 이미지 실제 좌표 정밀 보정)
+    const containerW = img.clientWidth;
+    const containerH = img.clientHeight;
+    const naturalW = img.naturalWidth;
+    const naturalH = img.naturalHeight;
+
+    // object-fit: cover 환경에서의 실제 이미지 스케일 및 오프셋 계산
+    const containerRatio = containerW / containerH;
+    const naturalRatio = naturalW / naturalH;
+
+    let scale, offsetX = 0, offsetY = 0;
+
+    if (naturalRatio > containerRatio) {
+      // 이미지가 컨테이너보다 가로로 더 긴 경우 (좌우가 잘림)
+      scale = naturalH / containerH;
+      offsetX = (naturalW - containerW * scale) / 2;
+    } else {
+      // 이미지가 컨테이너보다 세로로 더 긴 경우 (상하가 잘림)
+      scale = naturalW / containerW;
+      offsetY = (naturalH - containerH * scale) / 2;
+    }
+
+    const blurX = selection.x * scale + offsetX;
+    const blurY = selection.y * scale + offsetY;
+    const blurW = selection.width * scale;
+    const blurH = selection.height * scale;
+
+    // 3. 선택 영역 블러 처리
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(blurX, blurY, blurW, blurH);
+    ctx.clip();
+
+    ctx.filter = 'blur(25px)';
+    ctx.drawImage(img, 0, 0);
+    ctx.restore();
+
+    // 4. 새로운 파일 생성
+    canvas.toBlob((blob) => {
+      const newFile = new File([blob], selectedFile.name, { type: selectedFile.type });
+      const newUrl = URL.createObjectURL(newFile);
+
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+
+      setSelectedFile(newFile);
+      setPreviewUrl(newUrl);
+      setIsBlurMode(false);
+      setSelection(null);
+    }, selectedFile.type);
   };
 
   const handleButtonClick = async () => {
+    if (isBlurMode) {
+      applyBlur();
+      return;
+    }
+
     if (!selectedFile) return;
     try {
       setIsUploading(true);
@@ -151,8 +275,69 @@ function PhotoUploadModal({ cell, onClose, onVerifySuccess }) {
           style={{ cursor: selectedFile ? 'default' : 'pointer' }}
         >
           {previewUrl ? (
-            <div className="photo-modal__preview-wrap">
-              <img src={previewUrl} alt="미션 인증 미리보기" className="photo-modal__preview-image" />
+            <div
+              className={`photo-modal__preview-wrap ${isBlurMode ? 'photo-modal__preview-wrap--blur-mode' : ''}`}
+              ref={containerRef}
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseUp}
+              onTouchStart={handleMouseDown}
+              onTouchMove={handleMouseMove}
+              onTouchEnd={handleMouseUp}
+            >
+              <img
+                ref={imageRef}
+                src={previewUrl}
+                alt="미션 인증 미리보기"
+                className="photo-modal__preview-image"
+                draggable={false}
+              />
+
+              {isBlurMode && selection && (
+                <div
+                  className="photo-modal__selection-box"
+                  style={{
+                    left: `${selection.x}px`,
+                    top: `${selection.y}px`,
+                    width: `${selection.width}px`,
+                    height: `${selection.height}px`,
+                  }}
+                />
+              )}
+
+              {isBlurMode && (
+                <div className="photo-modal__blur-hint">
+                  가리고 싶은 영역을 드래그하세요
+                </div>
+              )}
+
+              {!isBlurMode && (
+                <button
+                  type="button"
+                  className="photo-modal__blur-toggle"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleBlurMode();
+                  }}
+                >
+                  <i className="fa-solid fa-mask"></i> 영역 가리기
+                </button>
+              )}
+
+              {isBlurMode && (
+                <button
+                  type="button"
+                  className="photo-modal__blur-cancel"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleBlurMode();
+                  }}
+                >
+                  취소
+                </button>
+              )}
+
               <button
                 type="button"
                 className="photo-modal__remove-photo"
@@ -188,10 +373,12 @@ function PhotoUploadModal({ cell, onClose, onVerifySuccess }) {
           className={`photo-modal__upload-btn${isUploading ? ' photo-modal__upload-btn--busy' : ''}`}
           type="button"
           onClick={handleButtonClick}
-          disabled={!selectedFile || isUploading}
+          disabled={!selectedFile || (isBlurMode && !selection) || isUploading}
         >
           {isUploading ? (
             '인증 중...'
+          ) : isBlurMode ? (
+            '블러 적용하기'
           ) : (
             <>
               <span>사진 인증하기</span>

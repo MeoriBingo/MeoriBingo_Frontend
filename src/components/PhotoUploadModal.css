@@ -78,6 +78,12 @@
   width: 100%;
   height: 100%;
   min-height: 0;
+  user-select: none;
+}
+
+.photo-modal__preview-wrap--blur-mode {
+  cursor: crosshair;
+  touch-action: none;
 }
 
 .photo-modal__preview-image {
@@ -85,6 +91,70 @@
   height: 100%;
   object-fit: cover;
   display: block;
+}
+
+.photo-modal__selection-box {
+  position: absolute;
+  border: 2px dashed #ffffff;
+  background-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+  z-index: 5;
+}
+
+.photo-modal__blur-hint {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(8, 6, 13, 0.75);
+  color: #ffffff;
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  z-index: 10;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.photo-modal__blur-toggle {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  z-index: 2;
+  background-color: rgba(8, 6, 13, 0.72);
+  color: #ffffff;
+  border: none;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: transform 0.15s ease;
+}
+
+.photo-modal__blur-toggle:active {
+  transform: scale(0.95);
+}
+
+.photo-modal__blur-cancel {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  z-index: 10;
+  background-color: #ffffff;
+  color: #08060d;
+  border: none;
+  border-radius: 999px;
+  padding: 8px 18px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .photo-modal__remove-photo {
