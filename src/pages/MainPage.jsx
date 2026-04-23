@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useContext, useRef } from 'react'
 import apiClient from '../api/apiClient'
+import { UserContext } from '../contexts/UserContext'
 import PhotoUploadModal from '../components/PhotoUploadModal'
 import BingoGenerateModal from '../components/BingoGenerateModal'
 import './MainPage.css'
@@ -15,41 +16,77 @@ function IconRefresh() {
 }
 
 function MainPage() {
+  const { user, updateUser } = useContext(UserContext);
   const [userInfo, setUserInfo] = useState({
-    nickname: '...',
-    point: 0,
-    streak_count: 0
+    nickname: user?.nickname || '...',
+    point: user?.point || 0,
+    streak_count: user?.streak_count || 0
   });
+
+  // user 컨텍스트가 변경되면 로컬 상태도 업데이트
+  useEffect(() => {
+    if (user) {
+      setUserInfo({
+        nickname: user.nickname,
+        point: user.point,
+        streak_count: user.streak_count
+      });
+    }
+  }, [user]);
 
   const [timeRemaining, setTimeRemaining] = useState({ hours: '00', minutes: '00' });
   const [bingoHistory, setBingoHistory] = useState(null);
+  const [reactions, setReactions] = useState([]);
   const [isBingoLoading, setIsBingoLoading] = useState(true);
   const [selectedCell, setSelectedCell] = useState(null);
   const [showGenerateModal, setShowGenerateModal] = useState(false);
 
+  const isUserFetched = useRef(false);
+  const isHistoryFetched = useRef(false);
+
+  const REACTION_ICONS = {
+    HEART: '❤️',
+    FIRE: '🔥',
+    LIKE: '👍',
+    SMILE: '😊',
+    BAD: '👎',
+    CRY: '😢',
+  };
+
+  const fetchReactions = async (boardId) => {
+    try {
+      const response = await apiClient.get(`/api/social/reactions/boards/${boardId}/reactions`);
+      setReactions(response.data || []);
+    } catch (error) {
+      console.error('리액션 로드 실패:', error);
+    }
+  };
+
   const fetchUserInfo = async () => {
     try {
-      const userStr = localStorage.getItem('user');
-      if (userStr) {
-        const user = JSON.parse(userStr);
-        if (user && user.id) {
-          const response = await apiClient.get(`/api/users/${user.id}`);
-          const data = response.data;
-          setUserInfo({
-            nickname: data.nickname,
-            point: data.point,
-            streak_count: data.streak_count
-          });
-        }
+      if (user && user.id) {
+        const response = await apiClient.get(`/api/users/${user.id}`);
+        const data = response.data;
+        const updatedInfo = {
+          nickname: data.nickname,
+          point: data.point,
+          streak_count: data.streak_count
+        };
+        setUserInfo(updatedInfo);
+        updateUser(updatedInfo);
       }
     } catch (error) {
-      console.error('API 호출 중 오류 발생:', error);
+      console.error('사용자 정보 로드 중 오류 발생:', error);
     }
   };
 
   useEffect(() => {
-    fetchUserInfo();
-  }, []);
+    if (isUserFetched.current) return;
+    if (user?.id) {
+      fetchUserInfo();
+      isUserFetched.current = true;
+    }
+  }, [user?.id]);
 
   const fetchBingoHistory = async () => {
     try {
@@ -58,18 +95,24 @@ function MainPage() {
 
       const response = await apiClient.get(`/api/history/history/by-date?target_date=${targetDate}`);
       const result = response.data;
-      // 백엔드 응답이 { data: [...] } 거나 직접 [...] 형태일 수 있으므로 두 경우 모두 방어
       const history = Array.isArray(result.data) ? result.data : (Array.isArray(result) ? result : []);
       setBingoHistory(history);
+
+      if (history.length > 0 && history[0].id) {
+        await fetchReactions(history[0].id);
+      }
     } catch (error) {
       console.error('빙고 내역 API 호출 오류:', error);
+      alert('빙고 내역을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.');
     } finally {
       setIsBingoLoading(false);
     }
   };
 
   useEffect(() => {
+    if (isHistoryFetched.current) return;
     fetchBingoHistory();
+    isHistoryFetched.current = true;
   }, []);
 
   useEffect(() => {
@@ -215,6 +258,22 @@ function MainPage() {
                 })()}
               </div>
 
+              {reactions.length > 0 && (
+                <div className="main-page__reactions">
+                  <p className="main-page__reactions-title">친구들의 반응</p>
+                  <div className="main-page__reactions-list">
+                    {reactions.map((reaction) => (
+                      <span
+                        key={reaction.id}
+                        className="main-page__reaction-item"
+                        title={reaction.nickname}
+                      >
+                        {REACTION_ICONS[reaction.reaction_type] || '❓'}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
               <button type="button" className="main-page__regen" onClick={handleResetBingo}>
                 <IconRefresh />
                 빙고판 재생성

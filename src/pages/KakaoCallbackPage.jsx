@@ -1,12 +1,12 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import apiClient from '../api/apiClient';
+import { UserContext } from '../contexts/UserContext';
 
 function KakaoCallbackPage() {
     const navigate = useNavigate();
+    const { login } = useContext(UserContext);
     const isProcessed = useRef(false);
-    const viteApiBaseUrl = import.meta.env.VITE_API_BASE_URL
-    console.log(viteApiBaseUrl)
 
     useEffect(() => {
         if (isProcessed.current) return;
@@ -25,16 +25,17 @@ function KakaoCallbackPage() {
                     if (result.status === "success") {
                         // 로컬 스토리지에 토큰 및 유저 정보 저장
                         localStorage.setItem('accessToken', result.data.accessToken);
-                        localStorage.setItem('user', JSON.stringify(result.data.user));
+                        login(result.data.user);
 
                         // 닉네임 설정 필요 등의 로직은 추후 추가
                         navigate('/main');
                     } else {
-                        console.error('Login failed logic:', result.message);
+                        alert(`로그인에 실패했습니다: ${result.message}`);
                         navigate('/login-fail');
                     }
                 } catch (error) {
                     console.error('Error connecting to backend server', error);
+                    alert('서버 연결 중 오류가 발생했습니다. 다시 시도해주세요.');
                     navigate('/login-fail');
                 }
             };
@@ -42,9 +43,10 @@ function KakaoCallbackPage() {
             sendCodeToBackend();
         } else {
             console.error('인가 코드가 없습니다.');
+            alert('로그인 인가 코드가 없습니다.');
             navigate('/');
         }
-    }, [navigate]);
+    }, [navigate, login]);
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>

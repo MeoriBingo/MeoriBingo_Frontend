@@ -91,60 +91,6 @@ function PhotoUploadModal({ cell, onClose, onVerifySuccess }) {
           // 1. 빙고칸 완료 처리
           await apiClient.patch(`/api/bingo/cells/${targetCellId}`);
 
-          // 2. 포인트 부여
-          await apiClient.post(`/api/admin/point/${userId}`, {
-            amount: 100,
-            reason: "미션 성공 포인트 부여"
-          });
-
-          // 3. 미션 성공내역 및 스트릭 업데이트를 위한 유저 정보 조회
-          const userResponse = await apiClient.get(`/api/users/${userId}`);
-          const userData = userResponse.data;
-
-          let streak_count = userData.streak_count || 0;
-          let last_completed_date = userData.last_completed_date;
-
-          const today = new Date();
-          // 로컬 시간을 기준으로 날짜 문자열 (YYYY-MM-DD) 생성
-          const year = today.getFullYear();
-          const month = String(today.getMonth() + 1).padStart(2, '0');
-          const day = String(today.getDate()).padStart(2, '0');
-          const todayStr = `${year}-${month}-${day}`;
-
-          if (!last_completed_date) {
-            // 첫 미션 달성
-            streak_count = 1;
-          } else {
-            const lastDate = new Date(last_completed_date);
-            const currentDate = new Date(todayStr);
-
-            const diffTime = currentDate.getTime() - lastDate.getTime();
-            const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
-
-            if (diffDays === 0) {
-              // 오늘 이미 성공한 적이 있음 - 스트릭 유지
-            } else if (diffDays === 1) {
-              // 어제 성공하고 오늘 처음 성공 - 스트릭 증가
-              streak_count += 1;
-            } else {
-              // 2일 이상 차이남 - 스트릭 초기화
-              streak_count = 1;
-            }
-          }
-
-          last_completed_date = todayStr;
-
-          // 서버에 스트릭 정보 업데이트
-          await apiClient.patch(`/api/users/mission/${userId}`, {
-            streak_count,
-            last_completed_date
-          });
-
-          // 로컬 컨텍스트 업데이트
-          if (updateUser) {
-            updateUser({ streak_count, last_completed_date });
-          }
-
           setIsSuccess(true);
           setResultMessage(data.message || '인증이 완료되었습니다!');
         } else {

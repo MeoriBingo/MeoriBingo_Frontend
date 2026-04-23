@@ -13,17 +13,62 @@ function IconBack() {
 
 function FriendBingoModal({ friend, onClose }) {
   const [bingoBoard, setBingoBoard] = useState(null);
+  const [reactions, setReactions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const REACTION_ICONS = {
+    HEART: '❤️',
+    FIRE: '🔥',
+    LIKE: '👍',
+    SMILE: '😊',
+    BAD: '👎',
+    CRY: '😢',
+  };
+
+  const fetchReactions = async (boardId) => {
+    try {
+      const response = await apiClient.get(`/api/social/reactions/boards/${boardId}/reactions`);
+      setReactions(response.data || []);
+    } catch (error) {
+      console.error('리액션 로드 실패:', error);
+    }
+  };
+
+  const handleReactionSubmit = async (reactionType) => {
+    if (!bingoBoard || !bingoBoard.board_id || isSubmitting) return;
+
+    try {
+      setIsSubmitting(true);
+      await apiClient.post('/api/social/reactions/friends/bingo/react', {
+        bingo_board_id: bingoBoard.board_id,
+        reaction_type: reactionType,
+      });
+      // 등록 성공 후 리액션 목록 새로고침
+      await fetchReactions(bingoBoard.board_id);
+    } catch (error) {
+      console.error('리액션 등록 실패:', error);
+      alert('리액션을 남기지 못했습니다. 다시 시도해주세요.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   useEffect(() => {
     let isMounted = true;
 
-    const fetchFriendBingo = async () => {
+    const fetchFriendBingoData = async () => {
       try {
         setIsLoading(true);
-        const response = await apiClient.get(`/api/bingo/active?user_id=${friend.user_id}`);
+        const boardResponse = await apiClient.get(`/api/bingo/active?user_id=${friend.user_id}`);
+        
         if (isMounted) {
-          setBingoBoard(response.data);
+          const boardData = boardResponse.data;
+          setBingoBoard(boardData);
+
+          if (boardData && boardData.board_id) {
+            await fetchReactions(boardData.board_id);
+          }
         }
       } catch (error) {
         console.error('친구 빙고 데이터 로드 실패:', error);
@@ -39,13 +84,13 @@ function FriendBingoModal({ friend, onClose }) {
     };
 
     if (friend && friend.user_id) {
-      fetchFriendBingo();
+      fetchFriendBingoData();
     }
 
     return () => {
       isMounted = false;
     };
-  }, [friend.user_id]); // friend 객체 전체 대신 user_id만 감시하고 onClose는 제외하여 안정성 확보
+  }, [friend.user_id]);
 
   if (!friend) return null;
 
@@ -104,6 +149,37 @@ function FriendBingoModal({ friend, onClose }) {
                 });
               })()}
             </div>
+
+            <div className="friend-bingo-action">
+              <p className="friend-bingo-action__label">반응 남기기</p>
+              <div className="friend-bingo-picker">
+                {Object.entries(REACTION_ICONS).map(([type, icon]) => (
+                  <button
+                    key={type}
+                    className="friend-bingo-picker__button"
+                    onClick={() => handleReactionSubmit(type)}
+                    disabled={isSubmitting}
+                    title={type}
+                  >
+                    {icon}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {reactions.length > 0 && (
+              <div className="friend-bingo-reactions">
+                {reactions.map((reaction) => (
+                  <span
+                    key={reaction.id}
+                    className="friend-bingo-reactions__item"
+                    title={reaction.nickname}
+                  >
+                    {REACTION_ICONS[reaction.reaction_type] || '❓'}
+                  </span>
+                ))}
+              </div>
+            )}
             
             <p className="friend-bingo-modal__footer">
               친구의 빙고판은 조회만 가능합니다.
