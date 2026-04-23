@@ -6,16 +6,11 @@ import MyPage from './pages/MyPage'
 import AdminPage from './pages/AdminPage'
 import KakaoCallbackPage from './pages/KakaoCallbackPage'
 import LoginFailPage from './pages/LoginFailPage'
+import PhotoUploadPreviewPage from './pages/PhotoUploadPreviewPage'
 import { UserProvider } from './contexts/UserContext'
 import Layout from './components/Layout'
-import PhotoUploadModal from './components/PhotoUploadModal'
 
 function App() {
-  const photoPreviewCell = {
-    id: 1,
-    mission_title: '샘플 미션',
-  }
-
   return (
     <UserProvider>
       <BrowserRouter>
@@ -23,6 +18,7 @@ function App() {
           <Route path="/" element={<LoginPage />} />
           <Route path="/auth/kakao/callback" element={<KakaoCallbackPage />} />
           <Route path="/login-fail" element={<LoginFailPage />} />
+          <Route path="/dev/photo-upload" element={<PhotoUploadPreviewPage />} />
 
           <Route element={<Layout />}>
             <Route path="/main" element={<MainPage />} />
