@@ -10,6 +10,20 @@ function IconBack() {
   );
 }
 
+function IconArrowRight() {
+  return (
+    <svg className="bingo-modal__generate-btn-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M5 12h14M13 6l6 6-6 6"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 const CATEGORIES = [
   { id: 'PRODUCTIVITY', label: '생산성' },
   { id: 'ACTIVITY', label: '활동성' },
@@ -54,8 +68,13 @@ function BingoGenerateModal({ onClose, onGenerate }) {
       </header>
 
       <div className="bingo-modal__content">
-        <section className="bingo-modal__section">
-          <h3 className="bingo-modal__section-title">원하는 범주 선택하기</h3>
+        <section className="bingo-modal__section-card bingo-modal__section-card--category">
+          <div className="bingo-modal__section-head">
+            <span className="bingo-modal__section-icon-wrap" aria-hidden="true">
+              <i className="fa-solid fa-layer-group bingo-modal__section-icon" />
+            </span>
+            <h3 className="bingo-modal__section-title">원하는 범주 선택하기</h3>
+          </div>
           <div className="bingo-modal__radio-group">
             {CATEGORIES.map((cat) => (
               <label key={cat.id} className="bingo-modal__radio-label">
@@ -72,8 +91,13 @@ function BingoGenerateModal({ onClose, onGenerate }) {
           </div>
         </section>
 
-        <section className="bingo-modal__section">
-          <h3 className="bingo-modal__section-title">도전 모드</h3>
+        <section className="bingo-modal__section-card bingo-modal__section-card--mode">
+          <div className="bingo-modal__section-head">
+            <span className="bingo-modal__section-icon-wrap" aria-hidden="true">
+              <i className="fa-solid fa-bolt bingo-modal__section-icon" />
+            </span>
+            <h3 className="bingo-modal__section-title">도전 모드</h3>
+          </div>
           <div className="bingo-modal__radio-group">
             {MODES.map((mode) => (
               <label key={mode.id} className="bingo-modal__radio-label">
@@ -96,7 +120,14 @@ function BingoGenerateModal({ onClose, onGenerate }) {
           onClick={handleGenerate}
           disabled={isGenerating}
         >
-          {isGenerating ? '생성 중...' : '빙고 생성하기'}
+          {isGenerating ? (
+            '생성 중...'
+          ) : (
+            <>
+              <span>빙고 생성하기</span>
+              <IconArrowRight />
+            </>
+          )}
         </button>
       </div>
 

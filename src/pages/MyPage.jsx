@@ -1,6 +1,7 @@
 import { useState, useEffect, useContext, useMemo } from 'react';
 import { UserContext } from '../contexts/UserContext';
 import apiClient from '../api/apiClient';
+import './MyPage.css';
 
 function MyPage() {
     const { updateUser } = useContext(UserContext);
@@ -123,62 +124,64 @@ function MyPage() {
     };
 
     return (
-        <div style={{ padding: '20px', maxWidth: '430px', margin: '0 auto', boxSizing: 'border-box' }}>
-            <h2 style={{ marginBottom: '24px', textAlign: 'center', fontWeight: '800' }}>마이페이지</h2>
+        <div className="my-page">
+            <h2 className="my-page__title">마이페이지</h2>
 
-            {/* 상단 섹션: 월간 집계 정보 */}
-            <div style={{ marginBottom: '32px', padding: '24px', backgroundColor: '#ffffff', borderRadius: '16px', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
-                <h3 style={{ marginTop: 0, marginBottom: '16px', fontSize: '18px', fontWeight: '700', color: '#08060d' }}>월간 활동 리포트</h3>
-                
+            <section className="my-page__card my-page__card--report">
+                <div className="my-page__card-head">
+                    <span className="my-page__card-icon-wrap" aria-hidden="true">
+                        <i className="fa-solid fa-chart-column my-page__card-icon" />
+                    </span>
+                    <h3 className="my-page__card-title">월간 활동 리포트</h3>
+                </div>
                 {Array.isArray(monthlyData) ? (
                     <>
-                        <p style={{ fontSize: '15px', color: '#444', marginBottom: '24px', lineHeight: '1.5' }}>
-                            이번 달 현재까지 달성한 미션의 갯수는 <strong style={{ color: '#007bff', fontSize: '18px' }}>{monthlyData.filter(i => i.is_completed).length}개</strong> 입니다.
+                        <p className="my-page__report-text">
+                            이번 달 현재까지 달성한 미션의 갯수는 <strong>{monthlyData.filter(i => i.is_completed).length}개</strong> 입니다.
                         </p>
 
-                        {/* 커스텀 막대 그래프 */}
-                        <div style={{ height: '180px', display: 'flex', alignItems: 'flex-end', gap: '2px', paddingBottom: '20px', borderBottom: '1px solid #eee', marginBottom: '10px' }}>
+                        <div className="my-page__chart">
                             {chartData.map((data) => (
-                                <div 
-                                    key={data.day} 
-                                    style={{ 
-                                        flex: 1, 
-                                        height: `${(data.count / maxCount) * 100}%`, 
-                                        backgroundColor: data.count > 0 ? '#007bff' : '#f0f0f0',
-                                        borderRadius: '2px 2px 0 0',
-                                        position: 'relative',
-                                        minHeight: data.count > 0 ? '4px' : '0'
-                                    }}
+                                <div
+                                    key={data.day}
+                                    className={`my-page__bar${data.count > 0 ? ' my-page__bar--active' : ''}`}
+                                    style={{ height: `${(data.count / maxCount) * 100}%` }}
                                     title={`${data.day}일: ${data.count}개`}
                                 >
                                     {data.count > 0 && (
-                                        <span style={{ position: 'absolute', top: '-18px', left: '50%', transform: 'translateX(-50%)', fontSize: '10px', fontWeight: 'bold', color: '#007bff' }}>
+                                        <span className="my-page__bar-count">
                                             {data.count}
                                         </span>
                                     )}
                                 </div>
                             ))}
                         </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: '#999', padding: '0 4px' }}>
+
+                        <div className="my-page__chart-caption">
                             <span>1일</span>
                             <span>15일</span>
                             <span>{chartData.length}일</span>
                         </div>
                     </>
                 ) : monthlyData?.error ? (
-                    <p style={{ color: '#dc3545', textAlign: 'center' }}>{monthlyData.error}</p>
+                    <p className="my-page__error-text">{monthlyData.error}</p>
                 ) : (
-                    <p style={{ textAlign: 'center', color: '#999' }}>데이터를 불러오는 중...</p>
+                    <p className="my-page__empty-text">데이터를 불러오는 중...</p>
                 )}
-            </div>
+            </section>
 
-            {/* 하단 섹션: 내 프로필 관리 */}
-            <div style={{ backgroundColor: '#ffffff', padding: '24px', borderRadius: '16px', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
-                <h3 style={{ marginTop: 0, marginBottom: '24px', fontSize: '18px', fontWeight: '700', color: '#08060d' }}>내 프로필 관리</h3>
-                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        <label htmlFor="nickname" style={{ fontSize: '14px', fontWeight: '600', color: '#666' }}>닉네임</label>
-                        <div style={{ display: 'flex', gap: '8px' }}>
+            <section className="my-page__card my-page__card--profile">
+                <div className="my-page__card-head">
+                    <span className="my-page__card-icon-wrap" aria-hidden="true">
+                        <i className="fa-solid fa-user-pen my-page__card-icon" />
+                    </span>
+                    <h3 className="my-page__card-title">내 프로필 관리</h3>
+                </div>
+
+                <form onSubmit={handleSubmit} className="my-page__form">
+                    <div className="my-page__field">
+                        <label htmlFor="nickname" className="my-page__label">닉네임</label>
+                        <div className="my-page__field-row">
                             <input
                                 type="text"
                                 id="nickname"
@@ -186,7 +189,7 @@ function MyPage() {
                                 value={currentProfile.nickname}
                                 onChange={handleChange}
                                 disabled={!isNicknameEditing}
-                                style={{ padding: '12px', fontSize: '15px', flex: 1, backgroundColor: isNicknameEditing ? 'white' : '#f8f8f8', color: '#333', border: '1px solid #eee', borderRadius: '12px', outline: 'none' }}
+                                className={`my-page__input${!isNicknameEditing ? ' my-page__input--disabled' : ''}`}
                             />
                             <button
                                 type="button"
@@ -196,16 +199,16 @@ function MyPage() {
                                     }
                                     setIsNicknameEditing(!isNicknameEditing);
                                 }}
-                                style={{ padding: '0 16px', cursor: 'pointer', backgroundColor: isNicknameEditing ? '#f0f0f0' : '#08060d', color: isNicknameEditing ? '#666' : 'white', border: 'none', borderRadius: '12px', fontSize: '13px', fontWeight: '600' }}
+                                className={`my-page__edit-btn${isNicknameEditing ? ' my-page__edit-btn--cancel' : ''}`}
                             >
                                 {isNicknameEditing ? '취소' : '수정'}
                             </button>
                         </div>
                     </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        <label htmlFor="email" style={{ fontSize: '14px', fontWeight: '600', color: '#666' }}>이메일</label>
-                        <div style={{ display: 'flex', gap: '8px' }}>
+                    <div className="my-page__field">
+                        <label htmlFor="email" className="my-page__label">이메일</label>
+                        <div className="my-page__field-row">
                             <input
                                 type="email"
                                 id="email"
@@ -213,7 +216,7 @@ function MyPage() {
                                 value={currentProfile.email}
                                 onChange={handleChange}
                                 disabled={!isEmailEditing}
-                                style={{ padding: '12px', fontSize: '15px', flex: 1, backgroundColor: isEmailEditing ? 'white' : '#f8f8f8', color: '#333', border: '1px solid #eee', borderRadius: '12px', outline: 'none' }}
+                                className={`my-page__input${!isEmailEditing ? ' my-page__input--disabled' : ''}`}
                             />
                             <button
                                 type="button"
@@ -223,18 +226,18 @@ function MyPage() {
                                     }
                                     setIsEmailEditing(!isEmailEditing);
                                 }}
-                                style={{ padding: '0 16px', cursor: 'pointer', backgroundColor: isEmailEditing ? '#f0f0f0' : '#08060d', color: isEmailEditing ? '#666' : 'white', border: 'none', borderRadius: '12px', fontSize: '13px', fontWeight: '600' }}
+                                className={`my-page__edit-btn${isEmailEditing ? ' my-page__edit-btn--cancel' : ''}`}
                             >
                                 {isEmailEditing ? '취소' : '수정'}
                             </button>
                         </div>
                     </div>
 
-                    <button type="submit" style={{ marginTop: '8px', padding: '16px', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer', fontWeight: '700', fontSize: '16px', boxShadow: '0 4px 12px rgba(0,123,255,0.2)' }}>
+                    <button type="submit" className="my-page__submit-btn">
                         저장하기
                     </button>
                 </form>
-            </div>
+            </section>
         </div>
     );
 }

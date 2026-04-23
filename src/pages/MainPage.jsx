@@ -129,110 +129,106 @@ function MainPage() {
     }
   };
 
+  const displayName = userInfo.nickname || '사용자';
+  const avatarLabel = displayName[0] ? displayName[0].toUpperCase() : 'M';
+
   return (
     <div className="main-page">
       <div className="main-page__scroll">
-        <h1 className="main-page__welcome">{userInfo.nickname}님 환영합니다.</h1>
+        <section className="main-page__hero" aria-label="유저 정보">
+          <div className="main-page__profile-row">
+            <div className="main-page__avatar" aria-hidden>{avatarLabel}</div>
+            <h1 className="main-page__welcome">Hello, {displayName}!</h1>
+          </div>
+          <span className="main-page__point-pill" aria-label={`보유 점수 ${userInfo.point}점`}>
+            <span className="main-page__point-coin" aria-hidden>🪙</span>
+            {userInfo.point}point
+          </span>
+        </section>
 
         <section className="main-page__streak" aria-label="연속 달성 현황">
-          <p className="main-page__streak-title">
-            <span aria-hidden>🔥</span>
-            {userInfo.streak_count}일째 달성 중
-          </p>
+          <div className="main-page__streak-head">
+            <span className="main-page__streak-badge">HOT STREAK</span>
+            <strong>{userInfo.streak_count}일째 달성 중!</strong>
+          </div>
           <p className="main-page__streak-desc">
-            AI가 생성한 미션을 통해 하루를 빙고로 기록하세요
+          AI가 매일 새로운 미션을 생성합니다! <br />
+          빙고를 완성하며 성취감 넘치는 하루를 기록하세요
           </p>
         </section>
 
-        <div className="main-page__section-head">
-          <h2 className="main-page__section-title">오늘의 빙고 미션</h2>
-          <span className="main-page__points" aria-label={`보유 점수 ${userInfo.point}점`}>
-            <span aria-hidden>🪙</span>
-            {userInfo.point}점
-          </span>
-        </div>
-
-        {isBingoLoading ? (
-          <div style={{ textAlign: 'center', padding: '40px 0', color: '#666' }}>
-            빙고 정보를 불러오는 중...
+        <section className="main-page__mission" aria-label="오늘의 빙고 미션">
+          <div className="main-page__section-head">
+            <h2 className="main-page__section-title">오늘의 빙고 미션</h2>
+            <p className="main-page__deadline">
+              <i className="fa-regular fa-clock" aria-hidden />
+              {timeRemaining.hours}h {timeRemaining.minutes}m 남음
+            </p>
           </div>
-        ) : (bingoHistory && bingoHistory.length > 0) ? (
-          <>
-            <div className="main-page__grid" role="list" aria-label="빙고 미션 9칸">
-              {(() => {
-                const firstBingo = bingoHistory[0];
-                const cells = firstBingo?.cells || [];
-                const sortedCells = [...cells].sort((a, b) => a.position - b.position);
 
-                if (sortedCells.length === 0) {
-                  return Array.from({ length: 9 }, (_, i) => (
-                    <div key={i} className="main-page__tile" role="listitem" />
-                  ));
-                }
+          {isBingoLoading ? (
+            <div className="main-page__state">빙고 정보를 불러오는 중...</div>
+          ) : (bingoHistory && bingoHistory.length > 0) ? (
+            <>
+              <div className="main-page__grid" role="list" aria-label="빙고 미션 9칸">
+                {(() => {
+                  const firstBingo = bingoHistory[0];
+                  const cells = firstBingo?.cells || [];
+                  const sortedCells = [...cells].sort((a, b) => a.position - b.position);
 
-                return sortedCells.map((cell) => {
-                  const hasImage = !!cell.proof_image_url;
-                  let imageUrl = cell.proof_image_url;
-
-                  // 만약 이미지가 상대경로(/로 시작)로 내려오면 API Base URL을 붙여줍니다
-                  if (hasImage && imageUrl.startsWith('/')) {
-                    const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
-                    imageUrl = `${baseUrl}${imageUrl}`;
+                  if (sortedCells.length === 0) {
+                    return Array.from({ length: 9 }, (_, i) => (
+                      <div key={i} className="main-page__tile" role="listitem" />
+                    ));
                   }
 
-                  const bgStyle = hasImage
-                    ? {
-                        backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7)), url(${imageUrl})`,
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center',
-                      }
-                    : {};
+                  return sortedCells.map((cell) => {
+                    const hasImage = !!cell.proof_image_url;
+                    let imageUrl = cell.proof_image_url;
 
-                  return (
-                    <div
-                      key={cell.id || cell.position}
-                      className="main-page__tile"
-                      role="button"
-                      tabIndex={0}
-                      onClick={() => setSelectedCell(cell)}
-                      style={bgStyle}
-                    >
-                      {cell.mission_title}
-                    </div>
-                  );
-                });
-              })()}
+                    if (hasImage && imageUrl.startsWith('/')) {
+                      const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
+                      imageUrl = `${baseUrl}${imageUrl}`;
+                    }
+
+                    const bgStyle = hasImage
+                      ? {
+                          backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.75)), url(${imageUrl})`,
+                          backgroundSize: 'cover',
+                          backgroundPosition: 'center',
+                        }
+                      : {};
+
+                    return (
+                      <div
+                        key={cell.id || cell.position}
+                        className={`main-page__tile${hasImage ? ' main-page__tile--with-image' : ''}`}
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => setSelectedCell(cell)}
+                        style={bgStyle}
+                      >
+                        {cell.mission_title}
+                      </div>
+                    );
+                  });
+                })()}
+              </div>
+
+              <button type="button" className="main-page__regen" onClick={handleResetBingo}>
+                <IconRefresh />
+                빙고판 재생성
+              </button>
+            </>
+          ) : (
+            <div className="main-page__empty">
+              <p>아직 생성된 빙고가 없어요.</p>
+              <button type="button" className="main-page__generate-btn" onClick={() => setShowGenerateModal(true)}>
+                빙고 생성하기
+              </button>
             </div>
-
-            <button type="button" className="main-page__regen" onClick={handleResetBingo}>
-              <IconRefresh />
-              빙고판 재생성
-            </button>
-          </>
-        ) : (
-          <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }}>
-            <button type="button" style={{
-              padding: '16px 32px',
-              fontSize: '18px',
-              backgroundColor: '#007bff',
-              color: 'white',
-              border: 'none',
-              borderRadius: '12px',
-              cursor: 'pointer',
-              fontWeight: 'bold',
-              boxShadow: '0 4px 12px rgba(0,123,255,0.3)',
-              transition: 'background-color 0.2s'
-            }}
-              onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#0056b3'}
-              onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#007bff'}
-              onClick={() => setShowGenerateModal(true)}
-            >
-              빙고 생성하기
-            </button>
-          </div>
-        )}
-
-        <p className="main-page__deadline">빙고 미션 달성 마감까지 {timeRemaining.hours}시간 {timeRemaining.minutes}분 남았습니다.</p>
+          )}
+        </section>
       </div>
 
       {selectedCell && (

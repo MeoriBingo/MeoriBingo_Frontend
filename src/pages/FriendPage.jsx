@@ -2,6 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import apiClient from '../api/apiClient';
 import { UserContext } from '../contexts/UserContext';
 import FriendBingoModal from '../components/FriendBingoModal';
+import './FriendPage.css';
 
 function FriendPage() {
     const { user } = useContext(UserContext);
@@ -129,43 +130,56 @@ function FriendPage() {
         }
     };
 
+    const formatStatusLabel = (status) => {
+        if (status === 'PENDING') return '대기 중';
+        if (status === 'ACCEPTED') return '수락됨';
+        if (status === 'REJECTED') return '거절됨';
+        return status || '-';
+    };
+
     return (
-        <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', height: '100%', gap: '20px', boxSizing: 'border-box' }}>
-            {/* 최상단: 친구 검색 */}
-            <div style={{ backgroundColor: '#fff', borderRadius: '8px', padding: '15px', boxShadow: '0 2px 5px rgba(0,0,0,0.05)' }}>
-                <h3 style={{ marginTop: 0, marginBottom: '15px', color: '#333' }}>친구 찾기</h3>
-                <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
+        <div className="friend-page">
+            <section className="friend-page__card friend-page__card--search">
+                <div className="friend-page__card-head">
+                    <span className="friend-page__card-icon-wrap" aria-hidden="true">
+                        <i className="fa-solid fa-magnifying-glass friend-page__card-icon" />
+                    </span>
+                    <h3 className="friend-page__card-title">친구 찾기</h3>
+                </div>
+
+                <div className="friend-page__search-row">
                     <input
                         type="text"
                         placeholder="닉네임 검색"
                         value={searchNickname}
                         onChange={(e) => setSearchNickname(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                        style={{ flex: 1, padding: '10px', borderRadius: '4px', border: '1px solid #ddd', fontSize: '14px' }}
+                        onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                        className="friend-page__search-input"
                     />
                     <button
                         onClick={handleSearch}
                         disabled={isSearching}
-                        style={{ padding: '10px 20px', borderRadius: '4px', border: 'none', backgroundColor: '#007bff', color: '#fff', cursor: 'pointer', fontWeight: 'bold' }}
+                        className={`friend-page__search-btn${isSearching ? ' friend-page__search-btn--busy' : ''}`}
                     >
                         {isSearching ? '검색 중...' : '검색'}
                     </button>
                 </div>
+
                 {searchResults.length > 0 && (
-                    <ul style={{ listStyleType: 'none', padding: 0, margin: 0 }}>
+                    <ul className="friend-page__list">
                         {searchResults.map((result) => (
-                            <li key={result.id} style={{ padding: '10px', borderBottom: '1px solid #f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <li key={result.id} className="friend-page__list-item">
+                                <div className="friend-page__user">
                                     {result.profile_image_url ? (
-                                        <img src={result.profile_image_url} alt={result.nickname} style={{ width: '32px', height: '32px', borderRadius: '50%' }} />
+                                        <img src={result.profile_image_url} alt={result.nickname} className="friend-page__avatar" />
                                     ) : (
-                                        <span style={{ fontSize: '24px' }}>👤</span>
+                                        <span className="friend-page__avatar friend-page__avatar--fallback">👤</span>
                                     )}
-                                    <span style={{ fontWeight: 500 }}>{result.nickname}</span>
+                                    <span className="friend-page__nickname">{result.nickname}</span>
                                 </div>
                                 <button
                                     onClick={() => handleRequestFriend(result.id)}
-                                    style={{ padding: '5px 12px', borderRadius: '4px', border: '1px solid #007bff', backgroundColor: '#fff', color: '#007bff', cursor: 'pointer', fontSize: '13px' }}
+                                    className="friend-page__action-btn"
                                 >
                                     친구 신청
                                 </button>
@@ -173,91 +187,93 @@ function FriendPage() {
                         ))}
                     </ul>
                 )}
-            </div>
+            </section>
 
-            {/* 상단: 현재 친구 목록 */}
-            <div style={{ flex: 1, backgroundColor: '#fff', borderRadius: '8px', padding: '15px', boxShadow: '0 2px 5px rgba(0,0,0,0.05)', overflowY: 'auto' }}>
-                <h3 style={{ marginTop: 0, marginBottom: '15px', borderBottom: '1px solid #eaeaea', paddingBottom: '10px', color: '#333' }}>현재 친구 목록</h3>
+            <section className="friend-page__card friend-page__card--friends">
+                <div className="friend-page__card-head">
+                    <span className="friend-page__card-icon-wrap" aria-hidden="true">
+                        <i className="fa-solid fa-user-group friend-page__card-icon" />
+                    </span>
+                    <h3 className="friend-page__card-title">현재 친구 목록</h3>
+                </div>
                 {isLoading ? (
-                    <p style={{ color: '#666' }}>친구 목록을 불러오는 중...</p>
+                    <p className="friend-page__empty-text">친구 목록을 불러오는 중...</p>
                 ) : friends.length > 0 ? (
-                    <ul style={{ listStyleType: 'none', padding: 0, margin: 0 }}>
+                    <ul className="friend-page__list">
                         {friends.map((friend, idx) => (
-                            <li 
-                                key={idx} 
-                                style={{ 
-                                    padding: '12px 10px', 
-                                    borderBottom: '1px solid #f0f0f0', 
-                                    display: 'flex', 
-                                    alignItems: 'center', 
-                                    gap: '10px',
-                                    cursor: 'pointer'
-                                }}
+                            <li
+                                key={idx}
+                                className="friend-page__list-item friend-page__list-item--clickable"
                                 onClick={() => setSelectedFriend(friend)}
                             >
-                                <span style={{ fontSize: '20px' }}>👤</span>
-                                <span style={{ fontWeight: 500, color: '#444' }}>{friend.nickname || '이름 없음'}</span>
-                                <span style={{ marginLeft: 'auto', fontSize: '12px', color: '#007bff' }}>빙고 보기</span>
+                                <span className="friend-page__avatar friend-page__avatar--fallback">👤</span>
+                                <span className="friend-page__nickname">{friend.nickname || '이름 없음'}</span>
+                                <span className="friend-page__link-text">빙고 보기</span>
                             </li>
                         ))}
                     </ul>
                 ) : (
-                    <p style={{ color: '#888', textAlign: 'center', marginTop: '20px' }}>등록된 친구가 없습니다.</p>
+                    <p className="friend-page__empty-text">등록된 친구가 없습니다.</p>
                 )}
-            </div>
+            </section>
 
-            {/* 하단: 친구 요청 현황 (좌/우 분할) */}
-            <div style={{ flex: 1, display: 'flex', gap: '15px' }}>
-                {/* 좌측: 내가 친구 요청한 목록 */}
-                <div style={{ flex: 1, backgroundColor: '#fff', borderRadius: '8px', padding: '15px', boxShadow: '0 2px 5px rgba(0,0,0,0.05)', overflowY: 'auto' }}>
-                    <h4 style={{ marginTop: 0, marginBottom: '10px', color: '#555' }}>내가 보낸 요청</h4>
+            <div className="friend-page__split">
+                <section className="friend-page__card friend-page__card--sent">
+                    <div className="friend-page__card-head friend-page__card-head--small">
+                        <span className="friend-page__card-icon-wrap" aria-hidden="true">
+                            <i className="fa-solid fa-paper-plane friend-page__card-icon" />
+                        </span>
+                        <h4 className="friend-page__card-title friend-page__card-title--small">내가 보낸 요청</h4>
+                    </div>
                     {!sentRequests ? (
-                        <p style={{ color: '#666', fontSize: '14px' }}>로딩 중...</p>
+                        <p className="friend-page__empty-text friend-page__empty-text--small">로딩 중...</p>
                     ) : sentRequests.error ? (
-                        <p style={{ color: '#ff4d4f', fontSize: '14px' }}>{sentRequests.error}</p>
+                        <p className="friend-page__error-text">{sentRequests.error}</p>
                     ) : Array.isArray(sentRequests) && sentRequests.length > 0 ? (
-                        <ul style={{ listStyleType: 'none', padding: 0, margin: 0 }}>
+                        <ul className="friend-page__list">
                             {sentRequests.map((req, idx) => (
-                                <li key={idx} style={{ padding: '8px 0', borderBottom: '1px solid #f9f9f9', fontSize: '14px', color: '#444' }}>
-                                    <span style={{ marginRight: '8px' }}>📤</span>
-                                    {req.fetchedNickname}
-                                    <span style={{ marginLeft: '10px', fontSize: '12px', color: '#999' }}>({req.status})</span>
+                                <li key={idx} className="friend-page__list-item friend-page__list-item--compact">
+                                    <span className="friend-page__nickname">{req.fetchedNickname}</span>
+                                    <span className="friend-page__status-chip">{formatStatusLabel(req.status)}</span>
                                 </li>
                             ))}
                         </ul>
                     ) : (
-                        <p style={{ color: '#aaa', textAlign: 'center', marginTop: '10px', fontSize: '14px' }}>보낸 요청이 없습니다.</p>
+                        <p className="friend-page__empty-text friend-page__empty-text--small">보낸 요청이 없습니다.</p>
                     )}
-                </div>
+                </section>
 
-                {/* 우측: 내가 받은 친구 요청 목록 */}
-                <div style={{ flex: 1, backgroundColor: '#fff', borderRadius: '8px', padding: '15px', boxShadow: '0 2px 5px rgba(0,0,0,0.05)', overflowY: 'auto' }}>
-                    <h4 style={{ marginTop: 0, marginBottom: '10px', color: '#555' }}>받은 요청</h4>
+                <section className="friend-page__card friend-page__card--received">
+                    <div className="friend-page__card-head friend-page__card-head--small">
+                        <span className="friend-page__card-icon-wrap" aria-hidden="true">
+                            <i className="fa-solid fa-inbox friend-page__card-icon" />
+                        </span>
+                        <h4 className="friend-page__card-title friend-page__card-title--small">받은 요청</h4>
+                    </div>
                     {!receivedRequests ? (
-                        <p style={{ color: '#666', fontSize: '14px' }}>로딩 중...</p>
+                        <p className="friend-page__empty-text friend-page__empty-text--small">로딩 중...</p>
                     ) : receivedRequests.error ? (
-                        <p style={{ color: '#ff4d4f', fontSize: '14px' }}>{receivedRequests.error}</p>
+                        <p className="friend-page__error-text">{receivedRequests.error}</p>
                     ) : Array.isArray(receivedRequests) && receivedRequests.length > 0 ? (
-                        <ul style={{ listStyleType: 'none', padding: 0, margin: 0 }}>
+                        <ul className="friend-page__list">
                             {receivedRequests.map((req, idx) => (
-                                <li key={idx} style={{ padding: '12px 0', borderBottom: '1px solid #f9f9f9', fontSize: '14px', color: '#444' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                                        <div>
-                                            <span style={{ marginRight: '8px' }}>📥</span>
-                                            <span style={{ fontWeight: 500 }}>{req.nickname}</span>
-                                            <span style={{ marginLeft: '10px', fontSize: '12px', color: '#999' }}>({req.status})</span>
+                                <li key={idx} className="friend-page__list-item friend-page__list-item--column">
+                                    <div className="friend-page__request-row">
+                                        <div className="friend-page__request-user">
+                                            <span className="friend-page__nickname">{req.nickname}</span>
+                                            <span className="friend-page__status-chip">{formatStatusLabel(req.status)}</span>
                                         </div>
                                         {req.status === 'PENDING' && (
-                                            <div style={{ display: 'flex', gap: '5px' }}>
+                                            <div className="friend-page__request-actions">
                                                 <button
                                                     onClick={() => handleRespondRequest(req.friendship_id, 'ACCEPTED')}
-                                                    style={{ padding: '4px 8px', borderRadius: '4px', border: 'none', backgroundColor: '#28a745', color: '#fff', cursor: 'pointer', fontSize: '12px' }}
+                                                    className="friend-page__mini-btn friend-page__mini-btn--accept"
                                                 >
                                                     수락
                                                 </button>
                                                 <button
                                                     onClick={() => handleRespondRequest(req.friendship_id, 'REJECTED')}
-                                                    style={{ padding: '4px 8px', borderRadius: '4px', border: 'none', backgroundColor: '#dc3545', color: '#fff', cursor: 'pointer', fontSize: '12px' }}
+                                                    className="friend-page__mini-btn friend-page__mini-btn--reject"
                                                 >
                                                     거절
                                                 </button>
@@ -268,12 +284,11 @@ function FriendPage() {
                             ))}
                         </ul>
                     ) : (
-                        <p style={{ color: '#aaa', textAlign: 'center', marginTop: '10px', fontSize: '14px' }}>받은 요청이 없습니다.</p>
+                        <p className="friend-page__empty-text friend-page__empty-text--small">받은 요청이 없습니다.</p>
                     )}
-                </div>
+                </section>
             </div>
 
-            {/* 친구 빙고판 모달 */}
             {selectedFriend && (
                 <FriendBingoModal 
                     friend={selectedFriend} 
