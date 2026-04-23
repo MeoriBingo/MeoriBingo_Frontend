@@ -1,34 +1,12 @@
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import './Layout.css';
 
-function IconHome() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-      <path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V9.5z" />
-    </svg>
-  )
-}
-
-function IconCart() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-      <circle cx="9" cy="20" r="1.5" fill="currentColor" stroke="none" />
-      <circle cx="17" cy="20" r="1.5" fill="currentColor" stroke="none" />
-      <path d="M3 3h2l.4 2M7 13h10l3-8H5.4M7 13 5.4 5M7 13l-1.5 6h11" />
-    </svg>
-  )
-}
-
 function Layout() {
     const navigate = useNavigate();
     const location = useLocation();
 
     return (
         <div className="layout">
-            <header className="layout__header">
-                <div className="layout__logo">BINGOO</div>
-            </header>
-
             <main className="layout__content">
                 <Outlet />
             </main>
@@ -40,7 +18,7 @@ function Layout() {
                         className={`layout__nav-item ${location.pathname === '/main' ? 'layout__nav-item--active' : ''}`}
                         onClick={() => navigate('/main')}
                     >
-                        <IconHome />
+                        <i className="fa-solid fa-house-chimney" aria-hidden />
                         Home
                     </button>
                     <button
@@ -48,7 +26,7 @@ function Layout() {
                         className={`layout__nav-item ${location.pathname === '/friend' ? 'layout__nav-item--active' : ''}`}
                         onClick={() => navigate('/friend')}
                     >
-                        <IconCart />
+                        <i className="fa-solid fa-user-group" aria-hidden />
                         Friend
                     </button>
                     <button
@@ -56,7 +34,7 @@ function Layout() {
                         className={`layout__nav-item ${location.pathname === '/mypage' ? 'layout__nav-item--active' : ''}`}
                         onClick={() => navigate('/mypage')}
                     >
-                        <IconCart />
+                        <i className="fa-solid fa-user" aria-hidden />
                         MyPage
                     </button>
                     <button
@@ -64,8 +42,8 @@ function Layout() {
                         className={`layout__nav-item ${location.pathname === '/admin' ? 'layout__nav-item--active' : ''}`}
                         onClick={() => navigate('/admin')}
                     >
-                        <IconCart />
-                        ADMIN
+                        <i className="fa-solid fa-shield-halved" aria-hidden />
+                        Admin
                     </button>
                 </div>
             </nav>
