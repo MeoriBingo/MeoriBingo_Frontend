@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext, useMemo } from 'react';
 import apiClient from '../api/apiClient';
 import { UserContext } from '../contexts/UserContext';
 import FriendBingoModal from '../components/FriendBingoModal';
@@ -15,8 +15,12 @@ function FriendPage() {
     const [searchResults, setSearchResults] = useState([]);
     const [isSearching, setIsSearching] = useState(false);
 
-    // 친구 빙고판 모달 상태
     const [selectedFriend, setSelectedFriend] = useState(null);
+
+    const avatarLetter = useMemo(() => {
+        const n = (user?.nickname || '?').trim();
+        return (n.charAt(0) || '?').toUpperCase();
+    }, [user?.nickname]);
 
     useEffect(() => {
         const fetchFriends = async () => {
@@ -38,7 +42,7 @@ function FriendPage() {
             try {
                 const response = await apiClient.get('/api/social/friends/requests/sent');
                 const requests = Array.isArray(response.data) ? response.data : [];
-                
+
                 const detailedRequests = await Promise.all(
                     requests.map(async (req) => {
                         try {
@@ -53,7 +57,7 @@ function FriendPage() {
                         }
                     })
                 );
-                
+
                 setSentRequests(detailedRequests);
             } catch (error) {
                 console.error('Sent requests API error:', error);
@@ -139,13 +143,28 @@ function FriendPage() {
 
     return (
         <div className="friend-page">
-            <section className="friend-page__card friend-page__card--search">
+            <span className="friend-page__sr-only" aria-live="polite">
+                {isSearching ? '닉네임 검색 중입니다.' : ''}
+            </span>
+
+            <header className="friend-page__hero">
+                <div className="friend-page__profile-row">
+                    <div className="friend-page__avatar" aria-hidden>
+                        {avatarLetter}
+                    </div>
+                    <h1 className="friend-page__title">친구</h1>
+                </div>
+            </header>
+
+            <section className="friend-page__card friend-page__card--search" aria-labelledby="friend-page-search-title">
                 <div className="friend-page__card-head">
-                    <span className="friend-page__card-icon-wrap" aria-hidden="true">
+                    <span className="friend-page__card-icon-wrap friend-page__card-icon-wrap--search" aria-hidden="true">
                         <i className="fa-solid fa-magnifying-glass friend-page__card-icon" />
                     </span>
-                    <h3 className="friend-page__card-title">친구 찾기</h3>
+                    <h2 id="friend-page-search-title" className="friend-page__card-title">친구 찾기</h2>
                 </div>
+
+                <p className="friend-page__hint">닉네임으로 검색해 친구 신청을 보낼 수 있어요.</p>
 
                 <div className="friend-page__search-row">
                     <input
@@ -155,8 +174,10 @@ function FriendPage() {
                         onChange={(e) => setSearchNickname(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                         className="friend-page__search-input"
+                        aria-label="친구 닉네임 검색"
                     />
                     <button
+                        type="button"
                         onClick={handleSearch}
                         disabled={isSearching}
                         className={`friend-page__search-btn${isSearching ? ' friend-page__search-btn--busy' : ''}`}
@@ -171,13 +192,14 @@ function FriendPage() {
                             <li key={result.id} className="friend-page__list-item">
                                 <div className="friend-page__user">
                                     {result.profile_image_url ? (
-                                        <img src={result.profile_image_url} alt={result.nickname} className="friend-page__avatar" />
+                                        <img src={result.profile_image_url} alt="" className="friend-page__thumb" />
                                     ) : (
-                                        <span className="friend-page__avatar friend-page__avatar--fallback">👤</span>
+                                        <span className="friend-page__thumb friend-page__thumb--fallback" aria-hidden>👤</span>
                                     )}
                                     <span className="friend-page__nickname">{result.nickname}</span>
                                 </div>
                                 <button
+                                    type="button"
                                     onClick={() => handleRequestFriend(result.id)}
                                     className="friend-page__action-btn"
                                 >
@@ -189,15 +211,26 @@ function FriendPage() {
                 )}
             </section>
 
-            <section className="friend-page__card friend-page__card--friends">
-                <div className="friend-page__card-head">
-                    <span className="friend-page__card-icon-wrap" aria-hidden="true">
-                        <i className="fa-solid fa-user-group friend-page__card-icon" />
-                    </span>
-                    <h3 className="friend-page__card-title">현재 친구 목록</h3>
+            <section className="friend-page__card friend-page__card--friends" aria-labelledby="friend-page-list-title">
+                <div className="friend-page__card-head friend-page__card-head--split">
+                    <div className="friend-page__card-head-left">
+                        <span className="friend-page__card-icon-wrap friend-page__card-icon-wrap--friends" aria-hidden="true">
+                            <i className="fa-solid fa-user-group friend-page__card-icon" />
+                        </span>
+                        <h2 id="friend-page-list-title" className="friend-page__card-title">친구 목록</h2>
+                    </div>
+                    {!isLoading && (
+                        <span className="friend-page__count-pill">{friends.length}명</span>
+                    )}
                 </div>
+
                 {isLoading ? (
-                    <p className="friend-page__empty-text">친구 목록을 불러오는 중...</p>
+                    <div className="friend-page__skeleton friend-page__skeleton--teal" aria-busy="true" aria-live="polite">
+                        <div className="friend-page__skeleton-line friend-page__skeleton-line--short" />
+                        <div className="friend-page__skeleton-line" />
+                        <div className="friend-page__skeleton-line" />
+                        <span className="friend-page__sr-only">친구 목록을 불러오는 중입니다.</span>
+                    </div>
                 ) : friends.length > 0 ? (
                     <ul className="friend-page__list">
                         {friends.map((friend, idx) => (
@@ -205,8 +238,17 @@ function FriendPage() {
                                 key={idx}
                                 className="friend-page__list-item friend-page__list-item--clickable"
                                 onClick={() => setSelectedFriend(friend)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' || e.key === ' ') {
+                                        e.preventDefault();
+                                        setSelectedFriend(friend);
+                                    }
+                                }}
+                                role="button"
+                                tabIndex={0}
+                                aria-label={`${friend.nickname || '이름 없음'} 빙고 보기`}
                             >
-                                <span className="friend-page__avatar friend-page__avatar--fallback">👤</span>
+                                <span className="friend-page__thumb friend-page__thumb--fallback" aria-hidden>👤</span>
                                 <span className="friend-page__nickname">{friend.nickname || '이름 없음'}</span>
                                 <span className="friend-page__link-text">빙고 보기</span>
                             </li>
@@ -218,17 +260,24 @@ function FriendPage() {
             </section>
 
             <div className="friend-page__split">
-                <section className="friend-page__card friend-page__card--sent">
-                    <div className="friend-page__card-head friend-page__card-head--small">
-                        <span className="friend-page__card-icon-wrap" aria-hidden="true">
+                <section className="friend-page__card friend-page__card--sent" aria-labelledby="friend-page-sent-title">
+                    <div className="friend-page__card-head">
+                        <span className="friend-page__card-icon-wrap friend-page__card-icon-wrap--sent" aria-hidden="true">
                             <i className="fa-solid fa-paper-plane friend-page__card-icon" />
                         </span>
-                        <h4 className="friend-page__card-title friend-page__card-title--small">내가 보낸 요청</h4>
+                        <h2 id="friend-page-sent-title" className="friend-page__card-title friend-page__card-title--small">보낸 요청</h2>
                     </div>
                     {!sentRequests ? (
-                        <p className="friend-page__empty-text friend-page__empty-text--small">로딩 중...</p>
+                        <div className="friend-page__skeleton friend-page__skeleton--neutral" aria-busy="true">
+                            <div className="friend-page__skeleton-line friend-page__skeleton-line--short" />
+                            <div className="friend-page__skeleton-line" />
+                            <span className="friend-page__sr-only">보낸 요청을 불러오는 중입니다.</span>
+                        </div>
                     ) : sentRequests.error ? (
-                        <p className="friend-page__error-text">{sentRequests.error}</p>
+                        <div className="friend-page__message friend-page__message--error" role="alert">
+                            <i className="fa-solid fa-circle-exclamation friend-page__message-icon" aria-hidden />
+                            <p className="friend-page__error-text">{sentRequests.error}</p>
+                        </div>
                     ) : Array.isArray(sentRequests) && sentRequests.length > 0 ? (
                         <ul className="friend-page__list">
                             {sentRequests.map((req, idx) => (
@@ -243,17 +292,24 @@ function FriendPage() {
                     )}
                 </section>
 
-                <section className="friend-page__card friend-page__card--received">
-                    <div className="friend-page__card-head friend-page__card-head--small">
-                        <span className="friend-page__card-icon-wrap" aria-hidden="true">
+                <section className="friend-page__card friend-page__card--received" aria-labelledby="friend-page-received-title">
+                    <div className="friend-page__card-head">
+                        <span className="friend-page__card-icon-wrap friend-page__card-icon-wrap--inbox" aria-hidden="true">
                             <i className="fa-solid fa-inbox friend-page__card-icon" />
                         </span>
-                        <h4 className="friend-page__card-title friend-page__card-title--small">받은 요청</h4>
+                        <h2 id="friend-page-received-title" className="friend-page__card-title friend-page__card-title--small">받은 요청</h2>
                     </div>
                     {!receivedRequests ? (
-                        <p className="friend-page__empty-text friend-page__empty-text--small">로딩 중...</p>
+                        <div className="friend-page__skeleton friend-page__skeleton--neutral" aria-busy="true">
+                            <div className="friend-page__skeleton-line friend-page__skeleton-line--short" />
+                            <div className="friend-page__skeleton-line" />
+                            <span className="friend-page__sr-only">받은 요청을 불러오는 중입니다.</span>
+                        </div>
                     ) : receivedRequests.error ? (
-                        <p className="friend-page__error-text">{receivedRequests.error}</p>
+                        <div className="friend-page__message friend-page__message--error" role="alert">
+                            <i className="fa-solid fa-circle-exclamation friend-page__message-icon" aria-hidden />
+                            <p className="friend-page__error-text">{receivedRequests.error}</p>
+                        </div>
                     ) : Array.isArray(receivedRequests) && receivedRequests.length > 0 ? (
                         <ul className="friend-page__list">
                             {receivedRequests.map((req, idx) => (
@@ -266,12 +322,14 @@ function FriendPage() {
                                         {req.status === 'PENDING' && (
                                             <div className="friend-page__request-actions">
                                                 <button
+                                                    type="button"
                                                     onClick={() => handleRespondRequest(req.friendship_id, 'ACCEPTED')}
                                                     className="friend-page__mini-btn friend-page__mini-btn--accept"
                                                 >
                                                     수락
                                                 </button>
                                                 <button
+                                                    type="button"
                                                     onClick={() => handleRespondRequest(req.friendship_id, 'REJECTED')}
                                                     className="friend-page__mini-btn friend-page__mini-btn--reject"
                                                 >
@@ -290,9 +348,9 @@ function FriendPage() {
             </div>
 
             {selectedFriend && (
-                <FriendBingoModal 
-                    friend={selectedFriend} 
-                    onClose={() => setSelectedFriend(null)} 
+                <FriendBingoModal
+                    friend={selectedFriend}
+                    onClose={() => setSelectedFriend(null)}
                 />
             )}
         </div>

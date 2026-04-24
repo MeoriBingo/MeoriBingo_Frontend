@@ -2,6 +2,7 @@ import { useEffect, useRef, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import apiClient from '../api/apiClient';
 import { UserContext } from '../contexts/UserContext';
+import './LoginPage.css';
 
 function KakaoCallbackPage() {
     const navigate = useNavigate();
@@ -49,9 +50,11 @@ function KakaoCallbackPage() {
     }, [navigate, login]);
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-            <h2>카카오 로그인 처리 중...</h2>
-            <p>잠시만 기다려주세요.</p>
+        <div className="auth-page">
+            <div className="auth-page__narrow">
+                <h2>카카오 로그인 처리 중...</h2>
+                <p>잠시만 기다려주세요.</p>
+            </div>
         </div>
     );
 }
