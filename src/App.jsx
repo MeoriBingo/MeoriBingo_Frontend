@@ -4,6 +4,7 @@ import MainPage from './pages/MainPage'
 import FriendPage from './pages/FriendPage'
 import MyPage from './pages/MyPage'
 import AdminPage from './pages/AdminPage'
+import ContactUsPage from './pages/ContactUsPage'
 import KakaoCallbackPage from './pages/KakaoCallbackPage'
 import LoginFailPage from './pages/LoginFailPage'
 import PhotoUploadPreviewPage from './pages/PhotoUploadPreviewPage'
@@ -25,6 +26,7 @@ function App() {
             <Route path="/friend" element={<FriendPage />} />
             <Route path="/mypage" element={<MyPage />} />
             <Route path="/admin" element={<AdminPage />} />
+            <Route path="/contact-us" element={<ContactUsPage />} />
           </Route>
         </Routes>
       </BrowserRouter>

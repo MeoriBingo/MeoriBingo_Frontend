@@ -45,6 +45,14 @@ function Layout() {
                         <i className="fa-solid fa-shield-halved" aria-hidden />
                         Admin
                     </button>
+                    <button
+                        type="button"
+                        className={`layout__nav-item ${location.pathname === '/contact-us' ? 'layout__nav-item--active' : ''}`}
+                        onClick={() => navigate('/contact-us')}
+                    >
+                        <i className="fa-solid fa-envelope" aria-hidden />
+                        Contact
+                    </button>
                 </div>
             </nav>
         </div>
