@@ -126,8 +126,15 @@
 
 .admin-page__grant-form {
   display: flex;
+  flex-direction: column;
+  align-items: flex-start;
   gap: 8px;
+}
+
+.admin-page__grant-actions {
+  display: flex;
   align-items: center;
+  gap: 8px;
   flex-wrap: nowrap;
   white-space: nowrap;
 }
