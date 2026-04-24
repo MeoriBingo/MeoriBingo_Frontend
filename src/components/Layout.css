@@ -48,7 +48,7 @@
     bottom: 14px;
     width: auto;
     max-width: none;
-    padding: 0 14px calc(6px + env(safe-area-inset-bottom, 0px));
+    padding: 0 18px calc(6px + env(safe-area-inset-bottom, 0px));
     box-sizing: border-box;
     z-index: 20;
 }
@@ -58,9 +58,11 @@
     justify-content: space-around;
     align-items: center;
     padding: 10px 0;
+    width: calc(100% - 40px);
     max-width: 100%;
-    margin: 0 auto;
-    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    box-sizing: border-box;
     background-color: #ffffff;
     border: 1px solid #ececec;
     border-radius: 9999px;

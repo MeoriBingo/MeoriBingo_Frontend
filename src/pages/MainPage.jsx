@@ -189,31 +189,43 @@ function MainPage() {
           </span>
         </section>
 
-        <section className="main-page__streak" aria-label="연속 달성 현황">
+        <section className="main-page__card main-page__card--streak" aria-label="연속 달성 현황">
           <div className="main-page__streak-head">
             <span className="main-page__streak-badge">HOT STREAK</span>
-            <strong>{userInfo.streak_count}일째 달성 중!</strong>
+            <strong className="main-page__streak-strong">{userInfo.streak_count}일째 달성 중!</strong>
           </div>
           <p className="main-page__streak-desc">
-          AI가 매일 새로운 미션을 생성합니다! <br />
-          빙고를 완성하며 성취감 넘치는 하루를 기록하세요
+            AI가 매일 새로운 미션을 생성합니다! <br />
+            빙고를 완성하며 성취감 넘치는 하루를 기록하세요
           </p>
         </section>
 
-        <section className="main-page__mission" aria-label="오늘의 빙고 미션">
-          <div className="main-page__section-head">
-            <h2 className="main-page__section-title">오늘의 빙고 미션</h2>
-            <p className="main-page__deadline">
+        <section className="main-page__card main-page__card--mission" aria-labelledby="main-page-mission-title">
+          <div className="main-page__card-head main-page__card-head--split">
+            <div className="main-page__card-head-left">
+              <span className="main-page__card-icon-wrap main-page__card-icon-wrap--mission" aria-hidden="true">
+                <i className="fa-solid fa-table-cells-large main-page__card-icon" />
+              </span>
+              <h2 id="main-page-mission-title" className="main-page__card-title">오늘의 빙고 미션</h2>
+            </div>
+            <p className="main-page__time-pill">
               <i className="fa-regular fa-clock" aria-hidden />
               {timeRemaining.hours}h {timeRemaining.minutes}m 남음
             </p>
           </div>
 
           {isBingoLoading ? (
-            <div className="main-page__state">빙고 정보를 불러오는 중...</div>
+            <div className="main-page__skeleton" aria-busy="true" aria-live="polite">
+              <div className="main-page__skeleton-grid">
+                {Array.from({ length: 9 }, (_, i) => (
+                  <div key={i} className="main-page__skeleton-tile" />
+                ))}
+              </div>
+              <span className="main-page__sr-only">빙고 정보를 불러오는 중입니다.</span>
+            </div>
           ) : (bingoHistory && bingoHistory.length > 0) ? (
             <>
-              <div className="main-page__grid" role="list" aria-label="빙고 미션 9칸">
+              <div className="main-page__grid" role="list" aria-label="빙고 미션 아홉 칸">
                 {(() => {
                   const firstBingo = bingoHistory[0];
                   const cells = firstBingo?.cells || [];
@@ -249,6 +261,12 @@ function MainPage() {
                         role="button"
                         tabIndex={0}
                         onClick={() => setSelectedCell(cell)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            setSelectedCell(cell);
+                          }
+                        }}
                         style={bgStyle}
                       >
                         {cell.mission_title}
@@ -259,7 +277,7 @@ function MainPage() {
               </div>
 
               {reactions.length > 0 && (
-                <div className="main-page__reactions">
+                <div className="main-page__reactions" aria-label="친구들의 반응">
                   <p className="main-page__reactions-title">친구들의 반응</p>
                   <div className="main-page__reactions-list">
                     {reactions.map((reaction) => (
@@ -281,7 +299,9 @@ function MainPage() {
             </>
           ) : (
             <div className="main-page__empty">
-              <p>아직 생성된 빙고가 없어요.</p>
+              <span className="main-page__empty-icon" aria-hidden>🎯</span>
+              <p className="main-page__empty-text">아직 생성된 빙고가 없어요.</p>
+              <p className="main-page__empty-hint">카테고리를 골라 첫 빙고판을 만들어 보세요.</p>
               <button type="button" className="main-page__generate-btn" onClick={() => setShowGenerateModal(true)}>
                 빙고 생성하기
               </button>

@@ -82,6 +82,25 @@ function MyPage() {
         return counts.length > 0 ? Math.max(...counts, 5) : 5; // 최소 높이 5 보장
     }, [chartData]);
 
+    const completedThisMonth = useMemo(() => {
+        if (!Array.isArray(monthlyData)) return 0;
+        return monthlyData.filter((i) => i.is_completed).length;
+    }, [monthlyData]);
+
+    const hasProfileChanges = useMemo(
+        () =>
+            currentProfile.nickname !== originalProfile.nickname ||
+            currentProfile.email !== originalProfile.email,
+        [currentProfile, originalProfile]
+    );
+
+    const monthLabel = useMemo(() => {
+        const now = new Date();
+        return `${now.getFullYear()}년 ${now.getMonth() + 1}월`;
+    }, []);
+
+    const avatarLetter = (currentProfile.nickname || '?').trim().charAt(0) || '?';
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setCurrentProfile(prev => ({
@@ -104,7 +123,6 @@ function MyPage() {
         }
 
         if (Object.keys(body).length === 0) {
-            alert('수정된 정보가 없습니다.');
             return;
         }
 
@@ -125,36 +143,55 @@ function MyPage() {
 
     return (
         <div className="my-page">
-            <h2 className="my-page__title">마이페이지</h2>
+            <header className="my-page__hero">
+                <div className="my-page__profile-row">
+                    <div className="my-page__avatar" aria-hidden>
+                        {avatarLetter.toUpperCase()}
+                    </div>
+                    <h1 className="my-page__title">마이페이지</h1>
+                </div>
+            </header>
 
-            <section className="my-page__card my-page__card--report">
-                <div className="my-page__card-head">
-                    <span className="my-page__card-icon-wrap" aria-hidden="true">
-                        <i className="fa-solid fa-chart-column my-page__card-icon" />
-                    </span>
-                    <h3 className="my-page__card-title">월간 활동 리포트</h3>
+            <section className="my-page__card my-page__card--report" aria-labelledby="my-page-report-title">
+                <div className="my-page__card-head my-page__card-head--split">
+                    <div className="my-page__card-head-left">
+                        <span className="my-page__card-icon-wrap" aria-hidden="true">
+                            <i className="fa-solid fa-chart-column my-page__card-icon" />
+                        </span>
+                        <h2 id="my-page-report-title" className="my-page__card-title">월간 활동 리포트</h2>
+                    </div>
+                    <span className="my-page__month-pill">{monthLabel}</span>
                 </div>
                 {Array.isArray(monthlyData) ? (
                     <>
+                        <div className="my-page__stat-row">
+                            <div className="my-page__stat">
+                                <span className="my-page__stat-label">이번 달 완료 미션</span>
+                                <span className="my-page__stat-value">{completedThisMonth}</span>
+                                <span className="my-page__stat-unit">개</span>
+                            </div>
+                        </div>
                         <p className="my-page__report-text">
-                            이번 달 현재까지 달성한 미션의 갯수는 <strong>{monthlyData.filter(i => i.is_completed).length}개</strong> 입니다.
+                            일별로 완료한 미션 수를 막대 그래프로 확인할 수 있어요.
                         </p>
 
-                        <div className="my-page__chart">
-                            {chartData.map((data) => (
-                                <div
-                                    key={data.day}
-                                    className={`my-page__bar${data.count > 0 ? ' my-page__bar--active' : ''}`}
-                                    style={{ height: `${(data.count / maxCount) * 100}%` }}
-                                    title={`${data.day}일: ${data.count}개`}
-                                >
-                                    {data.count > 0 && (
-                                        <span className="my-page__bar-count">
-                                            {data.count}
-                                        </span>
-                                    )}
-                                </div>
-                            ))}
+                        <div className="my-page__chart-scroll" role="img" aria-label={`${monthLabel} 일별 미션 완료 수`}>
+                            <div className="my-page__chart">
+                                {chartData.map((data) => (
+                                    <div
+                                        key={data.day}
+                                        className={`my-page__bar${data.count > 0 ? ' my-page__bar--active' : ''}`}
+                                        style={{ height: `${(data.count / maxCount) * 100}%` }}
+                                        title={`${data.day}일: ${data.count}개`}
+                                    >
+                                        {data.count > 0 && (
+                                            <span className="my-page__bar-count">
+                                                {data.count}
+                                            </span>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
                         </div>
 
                         <div className="my-page__chart-caption">
@@ -164,18 +201,25 @@ function MyPage() {
                         </div>
                     </>
                 ) : monthlyData?.error ? (
-                    <p className="my-page__error-text">{monthlyData.error}</p>
+                    <div className="my-page__message my-page__message--error" role="alert">
+                        <i className="fa-solid fa-circle-exclamation my-page__message-icon" aria-hidden />
+                        <p className="my-page__error-text">{monthlyData.error}</p>
+                    </div>
                 ) : (
-                    <p className="my-page__empty-text">데이터를 불러오는 중...</p>
+                    <div className="my-page__skeleton" aria-busy="true" aria-live="polite">
+                        <div className="my-page__skeleton-line my-page__skeleton-line--short" />
+                        <div className="my-page__skeleton-chart" />
+                        <span className="my-page__sr-only">데이터를 불러오는 중입니다.</span>
+                    </div>
                 )}
             </section>
 
-            <section className="my-page__card my-page__card--profile">
+            <section className="my-page__card my-page__card--profile" aria-labelledby="my-page-profile-title">
                 <div className="my-page__card-head">
                     <span className="my-page__card-icon-wrap" aria-hidden="true">
                         <i className="fa-solid fa-user-pen my-page__card-icon" />
                     </span>
-                    <h3 className="my-page__card-title">내 프로필 관리</h3>
+                    <h2 id="my-page-profile-title" className="my-page__card-title">내 프로필 관리</h2>
                 </div>
 
                 <form onSubmit={handleSubmit} className="my-page__form">
@@ -233,7 +277,11 @@ function MyPage() {
                         </div>
                     </div>
 
-                    <button type="submit" className="my-page__submit-btn">
+                    <button
+                        type="submit"
+                        className={`my-page__submit-btn${hasProfileChanges ? ' my-page__submit-btn--active' : ''}`}
+                        disabled={!hasProfileChanges}
+                    >
                         저장하기
                     </button>
                 </form>

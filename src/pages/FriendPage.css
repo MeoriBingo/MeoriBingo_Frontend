@@ -1,117 +1,263 @@
 .friend-page {
+  width: 100%;
+  min-height: 100%;
+  max-width: 430px;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  height: 100%;
-  background-color: #fff;
-  padding: 20px;
+  gap: 0;
+  padding: 14px 18px 28px;
   box-sizing: border-box;
   overflow-y: auto;
+  background-color: #fff;
+  color: #08060d;
 }
 
-.friend-page__card {
-  border-radius: 32px;
-  padding: 22px 20px;
+.friend-page__sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* 히어로 — MainPage 와 동일 */
+.friend-page__hero {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 52px;
   box-sizing: border-box;
+  padding: 0 2px 16px;
+  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 26px;
+}
+
+.friend-page__profile-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.friend-page__avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #bbf3ff, #7dddf2);
+  color: #00586d;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.friend-page__title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: #202023;
+}
+
+/* 카드 — MainPage 카드와 동일 폭 */
+.friend-page__card {
+  border-radius: 22px;
+  padding: 20px 18px 18px;
+  box-sizing: border-box;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+}
+
+.friend-page > .friend-page__card {
+  width: calc(100% - 40px);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.friend-page > .friend-page__split {
+  width: calc(100% - 40px);
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box;
+}
+
+.friend-page > .friend-page__card + .friend-page__card,
+.friend-page > .friend-page__card + .friend-page__split {
+  margin-top: 18px;
 }
 
 .friend-page__card--search {
-  background-color: #fff8d6;
+  background: linear-gradient(165deg, #fffcef 0%, #fff8d6 100%);
+  border-color: rgba(232, 220, 161, 0.55);
 }
 
 .friend-page__card--friends {
-  background-color: #e6fafd;
+  background: linear-gradient(165deg, #f2fcfe 0%, #e6fafd 100%);
+  border-color: rgba(154, 213, 223, 0.45);
   flex: 1;
-  min-height: 220px;
+  min-height: 200px;
 }
 
 .friend-page__card--sent,
 .friend-page__card--received {
-  background-color: #ffffff;
-  border: 1px solid #ececec;
-  min-height: 220px;
+  background: linear-gradient(165deg, #fafafa 0%, #ffffff 100%);
+  border-color: rgba(0, 0, 0, 0.06);
+  min-height: 200px;
 }
 
 .friend-page__card-head {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 16px;
-}
-
-.friend-page__card-head--small {
   margin-bottom: 12px;
 }
 
+.friend-page__card-head--split {
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.friend-page__card-head-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.friend-page__count-pill {
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 700;
+  color: #0f6d7f;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(154, 213, 223, 0.85);
+  padding: 6px 12px;
+  border-radius: 9999px;
+}
+
 .friend-page__card-icon-wrap {
-  width: 30px;
-  height: 30px;
+  width: 36px;
+  height: 36px;
   border-radius: 9999px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background-color: rgba(255, 255, 255, 0.65);
-  color: #2c2c2c;
   flex-shrink: 0;
 }
 
+.friend-page__card-icon-wrap--search {
+  background-color: #f2ec8b;
+  color: #4b4511;
+}
+
+.friend-page__card-icon-wrap--friends {
+  background-color: #c8eff5;
+  color: #005b6e;
+}
+
+.friend-page__card-icon-wrap--sent {
+  background-color: #e8ecf5;
+  color: #3d4a63;
+}
+
+.friend-page__card-icon-wrap--inbox {
+  background-color: #e6f5f0;
+  color: #1a7a5c;
+}
+
 .friend-page__card-icon {
-  font-size: 14px;
+  font-size: 15px;
 }
 
 .friend-page__card-title {
   margin: 0;
-  font-size: 18px;
-  font-weight: 700;
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
   color: #08060d;
 }
 
 .friend-page__card-title--small {
-  font-size: 16px;
+  font-size: 15px;
 }
 
+.friend-page__hint {
+  margin: 0 0 12px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #5c5428;
+}
+
+.friend-page__card--friends .friend-page__hint {
+  color: #3d6570;
+}
+
+/* 검색 */
 .friend-page__search-row {
   display: flex;
   gap: 10px;
-  margin-bottom: 14px;
+  margin-bottom: 4px;
 }
 
 .friend-page__search-input {
   flex: 1;
-  height: 44px;
-  border-radius: 9999px;
-  border: 2px solid #f0e5a2;
-  padding: 0 16px;
-  font-size: 14px;
+  min-width: 0;
+  height: 48px;
+  border-radius: 14px;
+  border: 1px solid #e8dca1;
+  padding: 0 14px;
+  font-size: 15px;
   font-family: inherit;
   outline: none;
   background-color: #ffffff;
   color: #08060d;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.friend-page__search-input:focus {
-  border-color: #dccf81;
+.friend-page__search-input:focus,
+.friend-page__search-input:focus-visible {
+  border-color: #cdbf53;
+  box-shadow: 0 0 0 3px rgba(205, 191, 83, 0.2);
 }
 
 .friend-page__search-btn {
-  height: 44px;
+  height: 48px;
   padding: 0 18px;
-  border: 2px solid transparent;
-  border-radius: 9999px;
-  background-color: #08060d;
+  border: none;
+  border-radius: 14px;
+  background-color: #005b6e;
   color: #ffffff;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   font-family: inherit;
+  transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.2s ease;
+}
+
+.friend-page__search-btn:hover:not(:disabled) {
+  background-color: #004a5a;
 }
 
 .friend-page__search-btn:active:not(:disabled) {
-  opacity: 0.88;
+  transform: scale(0.98);
+  opacity: 0.92;
+}
+
+.friend-page__search-btn:focus-visible {
+  outline: 2px solid #005b6e;
+  outline-offset: 2px;
 }
 
 .friend-page__search-btn:disabled {
-  opacity: 0.45;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
@@ -120,8 +266,9 @@
   cursor: wait;
 }
 
+/* 목록 */
 .friend-page__list {
-  margin: 0;
+  margin: 12px 0 0;
   padding: 0;
   list-style: none;
 }
@@ -131,8 +278,8 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 12px 10px;
-  border-bottom: 1px solid rgba(8, 6, 13, 0.08);
+  padding: 12px 8px;
+  border-bottom: 1px solid rgba(8, 6, 13, 0.07);
 }
 
 .friend-page__list-item:last-child {
@@ -140,23 +287,33 @@
 }
 
 .friend-page__list-item--compact {
-  padding: 10px 8px;
+  padding: 10px 6px;
 }
 
 .friend-page__list-item--clickable {
   cursor: pointer;
+  border-radius: 12px;
+  transition: background-color 0.15s ease;
+}
+
+.friend-page__list-item--clickable:hover {
+  background-color: rgba(255, 255, 255, 0.65);
+}
+
+.friend-page__list-item--clickable:focus-visible {
+  outline: 2px solid #5ec4d4;
+  outline-offset: 2px;
 }
 
 .friend-page__list-item--clickable:active {
-  background-color: rgba(255, 255, 255, 0.55);
-  border-radius: 14px;
+  background-color: rgba(255, 255, 255, 0.9);
 }
 
 .friend-page__list-item--column {
   flex-direction: column;
   align-items: stretch;
-  padding-left: 8px;
-  padding-right: 8px;
+  padding-left: 6px;
+  padding-right: 6px;
 }
 
 .friend-page__user {
@@ -166,51 +323,61 @@
   min-width: 0;
 }
 
-.friend-page__avatar {
-  width: 34px;
-  height: 34px;
+.friend-page__thumb {
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
 }
 
-.friend-page__avatar--fallback {
-  background-color: #f2f2f2;
+.friend-page__thumb--fallback {
+  background-color: #eef6f8;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 19px;
+  font-size: 18px;
 }
 
 .friend-page__nickname {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
-  color: #1e1e1e;
+  color: #1a1a1a;
   word-break: break-word;
 }
 
 .friend-page__action-btn {
-  height: 34px;
-  padding: 0 12px;
+  height: 36px;
+  padding: 0 14px;
   border: 1px solid #005b6e;
   border-radius: 9999px;
   background-color: #ffffff;
   color: #005b6e;
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 700;
   cursor: pointer;
   font-family: inherit;
   white-space: nowrap;
+  transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+.friend-page__action-btn:hover {
+  background-color: #f4fcff;
 }
 
 .friend-page__action-btn:active {
-  background-color: #f4fcff;
+  transform: scale(0.98);
+}
+
+.friend-page__action-btn:focus-visible {
+  outline: 2px solid #005b6e;
+  outline-offset: 2px;
 }
 
 .friend-page__link-text {
   margin-left: auto;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   color: #0f6d7f;
 }
 
@@ -224,12 +391,12 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 3px 8px;
+  padding: 4px 10px;
   border-radius: 9999px;
-  background-color: #f1f1f1;
+  background-color: #f0f2f5;
   color: #555;
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
   white-space: nowrap;
 }
 
@@ -246,24 +413,27 @@
   align-items: center;
   gap: 8px;
   min-width: 0;
+  flex-wrap: wrap;
 }
 
 .friend-page__request-actions {
   display: flex;
   align-items: center;
   gap: 6px;
+  flex-shrink: 0;
 }
 
 .friend-page__mini-btn {
-  height: 28px;
+  height: 30px;
   border: none;
   border-radius: 9999px;
-  padding: 0 10px;
+  padding: 0 12px;
   color: #ffffff;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   font-family: inherit;
+  transition: opacity 0.15s ease, transform 0.15s ease;
 }
 
 .friend-page__mini-btn--accept {
@@ -274,30 +444,127 @@
   background-color: #da4d4d;
 }
 
+.friend-page__mini-btn:hover {
+  opacity: 0.92;
+}
+
 .friend-page__mini-btn:active {
-  opacity: 0.85;
+  transform: scale(0.97);
+}
+
+.friend-page__mini-btn:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+/* 메시지·스켈레톤 */
+.friend-page__message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 10px;
+  text-align: center;
+}
+
+.friend-page__message-icon {
+  font-size: 22px;
+  color: #c94a4a;
+}
+
+.friend-page__message--error .friend-page__error-text {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: 600;
+  color: #b33a3a;
+}
+
+.friend-page__skeleton {
+  padding: 8px 0 4px;
+}
+
+.friend-page__skeleton-line {
+  height: 12px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  background-size: 200% 100%;
+  animation: friend-page-shimmer 1.2s ease-in-out infinite;
+}
+
+.friend-page__skeleton-line:last-of-type {
+  margin-bottom: 0;
+}
+
+.friend-page__skeleton-line--short {
+  width: 45%;
+}
+
+.friend-page__skeleton--teal .friend-page__skeleton-line {
+  background: linear-gradient(
+    90deg,
+    rgba(154, 213, 223, 0.35) 0%,
+    rgba(255, 255, 255, 0.9) 50%,
+    rgba(154, 213, 223, 0.35) 100%
+  );
+  background-size: 200% 100%;
+}
+
+.friend-page__skeleton--neutral .friend-page__skeleton-line {
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.06) 0%,
+    rgba(255, 255, 255, 0.95) 50%,
+    rgba(0, 0, 0, 0.06) 100%
+  );
+  background-size: 200% 100%;
+}
+
+@keyframes friend-page-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .friend-page__skeleton-line {
+    animation: none;
+  }
+
+  .friend-page__skeleton--teal .friend-page__skeleton-line {
+    background: rgba(154, 213, 223, 0.35);
+  }
+
+  .friend-page__skeleton--neutral .friend-page__skeleton-line {
+    background: rgba(0, 0, 0, 0.08);
+  }
 }
 
 .friend-page__empty-text {
-  margin: 12px 0 0;
+  margin: 16px 0 0;
   text-align: center;
   font-size: 14px;
+  line-height: 1.5;
   color: #6e6e6e;
 }
 
 .friend-page__empty-text--small {
   font-size: 13px;
+  margin-top: 12px;
 }
 
 .friend-page__error-text {
-  margin: 10px 0 0;
+  margin: 0;
   font-size: 13px;
   color: #d64545;
 }
 
 @media (max-width: 360px) {
   .friend-page {
-    padding: 16px;
+    padding: 14px 18px 28px;
   }
 
   .friend-page__split {

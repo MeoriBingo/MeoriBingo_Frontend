@@ -68,13 +68,14 @@ function BingoGenerateModal({ onClose, onGenerate }) {
       </header>
 
       <div className="bingo-modal__content">
-        <section className="bingo-modal__section-card bingo-modal__section-card--category">
+        <section className="bingo-modal__section-card bingo-modal__section-card--category" aria-labelledby="bingo-modal-category-title">
           <div className="bingo-modal__section-head">
             <span className="bingo-modal__section-icon-wrap" aria-hidden="true">
               <i className="fa-solid fa-layer-group bingo-modal__section-icon" />
             </span>
-            <h3 className="bingo-modal__section-title">원하는 범주 선택하기</h3>
+            <h2 id="bingo-modal-category-title" className="bingo-modal__section-title">원하는 범주 선택하기</h2>
           </div>
+          <p className="bingo-modal__hint">오늘의 미션 톤을 골라 주세요.</p>
           <div className="bingo-modal__radio-group">
             {CATEGORIES.map((cat) => (
               <label key={cat.id} className="bingo-modal__radio-label">
@@ -91,13 +92,14 @@ function BingoGenerateModal({ onClose, onGenerate }) {
           </div>
         </section>
 
-        <section className="bingo-modal__section-card bingo-modal__section-card--mode">
+        <section className="bingo-modal__section-card bingo-modal__section-card--mode" aria-labelledby="bingo-modal-mode-title">
           <div className="bingo-modal__section-head">
             <span className="bingo-modal__section-icon-wrap" aria-hidden="true">
               <i className="fa-solid fa-bolt bingo-modal__section-icon" />
             </span>
-            <h3 className="bingo-modal__section-title">도전 모드</h3>
+            <h2 id="bingo-modal-mode-title" className="bingo-modal__section-title">도전 모드</h2>
           </div>
+          <p className="bingo-modal__hint bingo-modal__hint--mode">난이도에 맞는 모드를 선택할 수 있어요.</p>
           <div className="bingo-modal__radio-group">
             {MODES.map((mode) => (
               <label key={mode.id} className="bingo-modal__radio-label">
