@@ -9,6 +9,9 @@ apiClient.interceptors.request.use(
     const token = localStorage.getItem('accessToken');
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`;
+    } else {
+      // 토큰이 없는 경우 기존 헤더를 명시적으로 제거하여 이전 사용자 토큰 유출 방지
+      delete config.headers['Authorization'];
     }
     return config;
   },
