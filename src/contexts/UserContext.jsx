@@ -18,7 +18,7 @@ export function UserProvider({ children }) {
     setUser(null);
     localStorage.removeItem('user');
     localStorage.removeItem('accessToken');
-    
+
     // API 클라이언트 헤더 명시적 제거
     delete apiClient.defaults.headers.common['Authorization'];
   };

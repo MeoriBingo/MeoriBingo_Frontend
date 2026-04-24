@@ -27,10 +27,10 @@ function KakaoCallbackPage() {
                         const token = result.data.accessToken;
                         // 로컬 스토리지에 토큰 및 유저 정보 저장
                         localStorage.setItem('accessToken', token);
-                        
+
                         // API 클라이언트 헤더 즉시 동기화
                         apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-                        
+
                         login(result.data.user);
 
                         // 닉네임 설정 필요 등의 로직은 추후 추가
