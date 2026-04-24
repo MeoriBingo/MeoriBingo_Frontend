@@ -101,20 +101,22 @@ function AdminPage() {
                             autoFocus
                             aria-label="부여할 포인트"
                           />
-                          <button
-                            type="button"
-                            className="admin-page__btn admin-page__btn--confirm"
-                            onClick={() => handleConfirmGrant(user.id)}
-                          >
-                            확인
-                          </button>
-                          <button
-                            type="button"
-                            className="admin-page__btn admin-page__btn--cancel"
-                            onClick={handleCancel}
-                          >
-                            취소
-                          </button>
+                          <div className="admin-page__grant-actions">
+                            <button
+                              type="button"
+                              className="admin-page__btn admin-page__btn--confirm"
+                              onClick={() => handleConfirmGrant(user.id)}
+                            >
+                              확인
+                            </button>
+                            <button
+                              type="button"
+                              className="admin-page__btn admin-page__btn--cancel"
+                              onClick={handleCancel}
+                            >
+                              취소
+                            </button>
+                          </div>
                         </div>
                       ) : (
                         <button
