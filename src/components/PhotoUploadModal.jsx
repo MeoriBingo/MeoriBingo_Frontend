@@ -134,10 +134,10 @@ function PhotoUploadModal({ cell, onClose, onVerifySuccess }) {
   return (
     <div className="photo-modal">
       <header className="photo-modal__header">
-        <button className="photo-modal__back" onClick={onClose} aria-label="뒤로가기">
+        <button type="button" className="photo-modal__back" onClick={onClose} aria-label="뒤로가기">
           <IconBack />
         </button>
-        <h2 className="photo-modal__title">사진 인증</h2>
+        <h1 className="photo-modal__title">사진 인증</h1>
       </header>
 
       <div className="photo-modal__content">
@@ -202,12 +202,12 @@ function PhotoUploadModal({ cell, onClose, onVerifySuccess }) {
 
         <section className="photo-modal__guide-card" aria-labelledby="photo-upload-guide-heading">
           <div className="photo-modal__guide-head">
-            <span className="photo-modal__guide-info-wrap" aria-hidden="true">
-              <i className="fa-solid fa-circle-info photo-modal__guide-info-fa" aria-hidden="true" />
+            <span className="photo-modal__guide-icon-wrap" aria-hidden="true">
+              <i className="fa-solid fa-circle-info photo-modal__guide-icon" />
             </span>
-            <h3 id="photo-upload-guide-heading" className="photo-modal__guide-heading">
+            <h2 id="photo-upload-guide-heading" className="photo-modal__guide-heading">
               사진 업로드 가이드
-            </h3>
+            </h2>
           </div>
           <ul className="photo-modal__guide-bullets">
             <li>부적절·선정적이거나 타인의 초상권을 침해하는 사진은 업로드할 수 없습니다.</li>
@@ -248,13 +248,13 @@ function PhotoUploadModal({ cell, onClose, onVerifySuccess }) {
       {isUploading && <LoadingOverlay message="AI가 사진을 분석하고 있습니다..." />}
 
       {resultMessage && (
-        <div className="result-overlay">
-          <div className="result-popup">
-            <div className={`result-popup__icon ${isSuccess ? 'result-popup__icon--success' : 'result-popup__icon--fail'}`}>
+        <div className="photo-modal__result-overlay" role="dialog" aria-modal="true" aria-live="polite">
+          <div className="photo-modal__result-popup">
+            <div className={`photo-modal__result-icon${isSuccess ? ' photo-modal__result-icon--success' : ' photo-modal__result-icon--fail'}`}>
               {isSuccess ? '✅' : '❌'}
             </div>
-            <p className="result-popup__message">{resultMessage}</p>
-            <button className="result-popup__btn" onClick={handleCloseResult}>
+            <p className="photo-modal__result-message">{resultMessage}</p>
+            <button type="button" className="photo-modal__result-btn" onClick={handleCloseResult}>
               확인
             </button>
           </div>
