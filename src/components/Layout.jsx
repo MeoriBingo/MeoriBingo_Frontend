@@ -1,9 +1,12 @@
+import { useContext } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { UserContext } from '../contexts/UserContext';
 import './Layout.css';
 
 function Layout() {
     const navigate = useNavigate();
     const location = useLocation();
+    const { role } = useContext(UserContext);
 
     return (
         <div className="layout">
@@ -37,14 +40,16 @@ function Layout() {
                         <i className="fa-solid fa-user" aria-hidden />
                         MyPage
                     </button>
-                    <button
-                        type="button"
-                        className={`layout__nav-item ${location.pathname === '/admin' ? 'layout__nav-item--active' : ''}`}
-                        onClick={() => navigate('/admin')}
-                    >
-                        <i className="fa-solid fa-shield-halved" aria-hidden />
-                        Admin
-                    </button>
+                    {role === 'ADMIN' && (
+                        <button
+                            type="button"
+                            className={`layout__nav-item ${location.pathname === '/admin' ? 'layout__nav-item--active' : ''}`}
+                            onClick={() => navigate('/admin')}
+                        >
+                            <i className="fa-solid fa-shield-halved" aria-hidden />
+                            Admin
+                        </button>
+                    )}
                     <button
                         type="button"
                         className={`layout__nav-item ${location.pathname === '/contact-us' ? 'layout__nav-item--active' : ''}`}

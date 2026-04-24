@@ -8,6 +8,25 @@ export function UserProvider({ children }) {
     const userStr = localStorage.getItem('user');
     return userStr ? JSON.parse(userStr) : null;
   });
+  const [role, setRole] = useState(null);
+
+  useEffect(() => {
+    if (user) {
+      fetchUserRole();
+    } else {
+      setRole(null);
+    }
+  }, [user]);
+
+  const fetchUserRole = async () => {
+    try {
+      const response = await apiClient.get('/api/users/me/role');
+      setRole(response.data.role);
+    } catch (error) {
+      console.error('Failed to fetch user role:', error);
+      setRole('USER'); // Default to USER on error
+    }
+  };
 
   const login = (userData) => {
     setUser(userData);
@@ -16,6 +35,7 @@ export function UserProvider({ children }) {
 
   const logout = () => {
     setUser(null);
+    setRole(null);
     localStorage.removeItem('user');
     localStorage.removeItem('accessToken');
 
@@ -32,7 +52,7 @@ export function UserProvider({ children }) {
   };
 
   return (
-    <UserContext.Provider value={{ user, login, logout, updateUser }}>
+    <UserContext.Provider value={{ user, role, login, logout, updateUser }}>
       {children}
     </UserContext.Provider>
   );
