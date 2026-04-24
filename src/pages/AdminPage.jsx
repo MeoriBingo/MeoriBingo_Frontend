@@ -77,7 +77,6 @@ function AdminPage() {
             <table className="admin-page__table">
               <thead>
                 <tr>
-                  <th scope="col">ID</th>
                   <th scope="col">닉네임</th>
                   <th scope="col">이메일</th>
                   <th scope="col">포인트</th>
@@ -87,7 +86,6 @@ function AdminPage() {
               <tbody>
                 {users.map((user) => (
                   <tr key={user.id}>
-                    <td>{user.id}</td>
                     <td>{user.nickname}</td>
                     <td>{user.email}</td>
                     <td>{Number(user.point ?? 0).toLocaleString()} P</td>

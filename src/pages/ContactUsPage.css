@@ -1,31 +1,58 @@
 .contact-us {
-  padding: 20px;
+  width: 100%;
+  min-height: 100%;
+  padding: 14px 18px 28px;
   max-width: 430px;
   margin: 0 auto;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 0;
   background-color: #fff;
-  height: 100%;
+}
+
+.contact-us__hero {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  box-sizing: border-box;
+  padding: 0 2px 16px;
+  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 26px;
+}
+
+.contact-us__profile-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
 }
 
 .contact-us__title {
   margin: 0;
-  text-align: center;
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 800;
-  color: #08060d;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: #202023;
+  text-align: center;
 }
 
 .contact-us__card {
-  border-radius: 40px;
-  padding: 24px 22px 22px;
+  width: calc(100% - 40px);
+  margin-left: auto;
+  margin-right: auto;
+  border-radius: 22px;
+  padding: 20px 18px 18px;
   box-sizing: border-box;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
 }
 
 .contact-us__card--form {
-  background-color: #f0fdf4; /* Greenish background */
+  background: linear-gradient(165deg, #f2fcfe 0%, #e6fafd 100%);
+  border-color: rgba(154, 213, 223, 0.45);
 }
 
 .contact-us__card-head {
@@ -36,25 +63,26 @@
 }
 
 .contact-us__card-icon-wrap {
-  width: 30px;
-  height: 30px;
+  width: 36px;
+  height: 36px;
   border-radius: 9999px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  background-color: #dcfce7;
-  color: #166534;
+  background-color: #c8eff5;
+  color: #005b6e;
 }
 
 .contact-us__card-icon {
-  font-size: 14px;
+  font-size: 15px;
 }
 
 .contact-us__card-title {
   margin: 0;
-  font-size: 18px;
-  font-weight: 700;
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
   color: #08060d;
 }
 
@@ -73,8 +101,8 @@
 
 .contact-us__label {
   font-size: 14px;
-  font-weight: 600;
-  color: #166534;
+  font-weight: 700;
+  color: #005b6e;
   text-align: left;
 }
 
@@ -82,9 +110,9 @@
   width: 100%;
   height: 46px;
   border-radius: 14px;
-  border: 1px solid #dcfce7;
+  border: 1px solid #c8e8ee;
   background-color: #ffffff;
-  color: #333;
+  color: #08060d;
   padding: 0 12px;
   font-size: 15px;
   outline: none;
@@ -93,18 +121,18 @@
 }
 
 .contact-us__input--disabled {
-  background-color: #f8fafc;
-  color: #64748b;
-  border-color: #e2e8f0;
+  background-color: #f5fbfd;
+  color: #56727a;
+  border-color: #d7eef3;
 }
 
 .contact-us__textarea {
   width: 100%;
-  min-height: 200px;
+  min-height: 190px;
   border-radius: 14px;
-  border: 1px solid #dcfce7;
+  border: 1px solid #c8e8ee;
   background-color: #ffffff;
-  color: #333;
+  color: #08060d;
   padding: 12px;
   font-size: 15px;
   outline: none;
@@ -114,27 +142,40 @@
 }
 
 .contact-us__textarea:focus {
-  border-color: #86efac;
+  border-color: #5ec4d4;
+  box-shadow: 0 0 0 3px rgba(94, 196, 212, 0.2);
 }
 
 .contact-us__submit-btn {
   margin-top: 8px;
-  width: 100%;
-  padding: 18px;
+  width: calc(100% - 40px);
+  margin-left: auto;
+  margin-right: auto;
+  padding: 16px 18px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: none;
+  border: 1px solid rgba(232, 220, 161, 0.85);
   border-radius: 9999px;
-  background-color: #166534;
-  color: #ffffff;
+  background: linear-gradient(180deg, #fffef5 0%, #fff8d6 100%);
+  color: #4b4511;
   font-size: 16px;
   font-weight: 700;
   font-family: inherit;
   cursor: pointer;
-  transition: opacity 0.2s;
+  box-shadow: 0 6px 18px rgba(75, 69, 17, 0.1);
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.contact-us__submit-btn:hover {
+  background: linear-gradient(180deg, #fffce8 0%, #fff3c0 100%);
 }
 
 .contact-us__submit-btn:active {
-  opacity: 0.8;
+  transform: scale(0.99);
+}
+
+.contact-us__submit-btn:focus-visible {
+  outline: 2px solid #cdbf53;
+  outline-offset: 2px;
 }
