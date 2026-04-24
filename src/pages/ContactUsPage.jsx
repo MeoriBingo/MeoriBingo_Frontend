@@ -27,7 +27,11 @@ function ContactUsPage() {
 
     return (
         <div className="contact-us">
-            <h1 className="contact-us__title">Contact Us</h1>
+            <header className="contact-us__hero">
+                <div className="contact-us__profile-row">
+                    <h1 className="contact-us__title">Contact Us</h1>
+                </div>
+            </header>
 
             <div className="contact-us__card contact-us__card--form">
                 <div className="contact-us__card-head">
