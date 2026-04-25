@@ -130,16 +130,24 @@ function FriendBingoModal({ friend, onClose }) {
 
                   const bgStyle = hasImage
                     ? {
-                        backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7)), url(${imageUrl})`,
+                        backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.75)), url(${imageUrl})`,
                         backgroundSize: 'cover',
                         backgroundPosition: 'center',
                       }
                     : {};
 
+                  const tileClass = [
+                    'friend-bingo-tile',
+                    cell.is_completed ? 'friend-bingo-tile--completed' : '',
+                    hasImage ? 'friend-bingo-tile--with-image' : '',
+                  ]
+                    .filter(Boolean)
+                    .join(' ');
+
                   return (
                     <div
                       key={cell.id || cell.position}
-                      className={`friend-bingo-tile ${cell.is_completed ? 'friend-bingo-tile--completed' : ''}`}
+                      className={tileClass}
                       style={bgStyle}
                     >
                       <span className="friend-bingo-tile__title">{cell.mission_title}</span>
