@@ -8,7 +8,7 @@
   width: 100%;
   max-width: 430px;
   margin: 0 auto;
-  padding: 14px 18px 28px;
+  padding: 22px 18px 34px;
   box-sizing: border-box;
 }
 
@@ -25,20 +25,132 @@
   text-align: center;
 }
 
+.login-header {
+  margin-top: 0;
+}
+
+.login-header > h1 {
+  margin: 0 0 10px;
+  font-size: 42px;
+  line-height: 1.08;
+  letter-spacing: 0.02em;
+}
+
+.login-actions {
+  margin-top: 88px;
+}
+
 .login-container__narrow > h1,
 .login-container__narrow > p {
   margin-left: auto;
   margin-right: auto;
 }
 
+.login-subtitle {
+  margin-bottom: 0;
+  color: #475569;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.login-caution {
+  margin-top: 30px;
+  margin-bottom: 0;
+  margin-left: auto;
+  margin-right: auto;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #6b7280;
+  max-width: 280px;
+  text-align: center;
+}
+
 .login-btn {
   width: 100%;
-  padding: 14px;
+  padding: 19px 16px;
   margin: 8px 0;
-  border-radius: 8px;
+  border-radius: 10px;
   border: none;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 15px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-height: 62px;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+}
+
+.login-btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(0.985);
+}
+
+.login-btn:active {
+  transform: translateY(0);
+  filter: brightness(0.96);
+}
+
+.login-btn:focus-visible {
+  outline: 3px solid rgba(59, 130, 246, 0.35);
+  outline-offset: 2px;
+}
+
+.login-btn__row {
+  display: grid;
+  grid-template-columns: 26px 165px;
+  column-gap: 10px;
+  align-items: center;
+  justify-content: center;
+  transform: translateX(22px);
+}
+
+.login-btn__icon-wrap {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+}
+
+.login-btn__label {
+  justify-self: start;
+  text-align: left;
+}
+
+.login-btn--kakao {
+  background: #fee500;
+  color: #191919;
+}
+
+.login-btn--naver {
+  background: #03c75a;
+  color: #ffffff;
+}
+
+.login-btn--google {
+  background: #ffffff;
+  color: #3c4043;
+  border: 1px solid #dadce0;
+}
+
+.social-icon {
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.social-icon__svg {
+  width: 100%;
+  height: 100%;
+}
+
+.social-icon--naver .social-icon__svg {
+  transform: scale(0.70);
+  transform-origin: center;
+  opacity: 0.92;
 }
 
 /* 로그인 처리·실패 등 보조 화면 */
@@ -65,8 +177,41 @@
 }
 
 @media (max-width: 768px) {
+  .login-header > h1 {
+    font-size: 36px;
+  }
+
+  .login-subtitle {
+    font-size: 15px;
+  }
+
+  .login-container {
+    padding: 16px 14px 28px;
+  }
+
+  .login-container__narrow {
+    padding: 0;
+  }
+
+  .login-actions {
+    margin-top: 72px;
+  }
+
   .login-btn {
     font-size: 14px;
-    padding: 12px;
+    padding: 18px 12px;
+    min-height: 58px;
   }
+
+  .login-btn__row {
+    grid-template-columns: 24px 152px;
+    column-gap: 8px;
+    transform: translateX(16px);
+  }
+
+  .social-icon {
+    width: 20px;
+    height: 20px;
+  }
+
 }
