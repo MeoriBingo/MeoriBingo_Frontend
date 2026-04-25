@@ -74,7 +74,7 @@ function AdminPage() {
           </div>
         ) : (
           <div className="admin-page__table-scroll">
-            <table className="admin-page__table">
+            <table className={`admin-page__table${editingUserId !== null ? ' admin-page__table--editing' : ''}`}>
               <thead>
                 <tr>
                   <th scope="col">닉네임</th>
@@ -85,50 +85,55 @@ function AdminPage() {
               </thead>
               <tbody>
                 {users.map((user) => (
-                  <tr key={user.id}>
-                    <td>{user.nickname}</td>
-                    <td>{user.email}</td>
-                    <td>{Number(user.point ?? 0).toLocaleString()} P</td>
-                    <td>
-                      {editingUserId === user.id ? (
-                        <div className="admin-page__grant-form">
-                          <input
-                            type="number"
-                            className="admin-page__input"
-                            placeholder="포인트"
-                            value={grantAmount}
-                            onChange={(e) => setGrantAmount(e.target.value)}
-                            autoFocus
-                            aria-label="부여할 포인트"
-                          />
-                          <div className="admin-page__grant-actions">
-                            <button
-                              type="button"
-                              className="admin-page__btn admin-page__btn--confirm"
-                              onClick={() => handleConfirmGrant(user.id)}
-                            >
-                              확인
-                            </button>
-                            <button
-                              type="button"
-                              className="admin-page__btn admin-page__btn--cancel"
-                              onClick={handleCancel}
-                            >
-                              취소
-                            </button>
-                          </div>
-                        </div>
-                      ) : (
+                  <React.Fragment key={user.id}>
+                    <tr data-user-id={user.id}>
+                      <td>{user.nickname}</td>
+                      <td>{user.email}</td>
+                      <td>{Number(user.point ?? 0).toLocaleString()} P</td>
+                      <td>
                         <button
                           type="button"
-                          className="admin-page__btn admin-page__btn--grant"
+                          className={`admin-page__btn admin-page__btn--grant${editingUserId === user.id ? ' admin-page__btn--grant-editing' : ''}`}
                           onClick={() => handleGrantClick(user.id)}
                         >
-                          포인트 부여
+                          {editingUserId === user.id ? '편집 중' : '포인트 부여'}
                         </button>
-                      )}
-                    </td>
-                  </tr>
+                      </td>
+                    </tr>
+                    {editingUserId === user.id && (
+                      <tr className="admin-page__edit-row">
+                        <td colSpan={4}>
+                          <div className="admin-page__grant-form">
+                            <input
+                              type="number"
+                              className="admin-page__input"
+                              placeholder="부여할 포인트를 입력하세요"
+                              value={grantAmount}
+                              onChange={(e) => setGrantAmount(e.target.value)}
+                              autoFocus
+                              aria-label="부여할 포인트"
+                            />
+                            <div className="admin-page__grant-actions">
+                              <button
+                                type="button"
+                                className="admin-page__btn admin-page__btn--confirm"
+                                onClick={() => handleConfirmGrant(user.id)}
+                              >
+                                확인
+                              </button>
+                              <button
+                                type="button"
+                                className="admin-page__btn admin-page__btn--cancel"
+                                onClick={handleCancel}
+                              >
+                                취소
+                              </button>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
                 ))}
               </tbody>
             </table>
